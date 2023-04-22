@@ -93,9 +93,23 @@ class MainScene extends Phaser.Scene {
 
         hexagon.row = row;
         hexagon.col = col;
+        hexagon.inUse = false;
         // add click event listener
         hexagon.on('pointerdown', function (this: Hexagon) {
-          console.log('Hexagon clicked at (' + (this).col + ', ' + (this).row + ')');
+          if (!this.inUse) {
+            this.scene.add.circle(this.x - hexSize + 3, this.y - hexSize, hexSize / 2, 0x000000);
+            this.inUse = true;
+          }
+        });
+        hexagon.on('pointerover', function (this: Hexagon) {
+          if (!this.inUse) {
+            this.fillColor = 0xdddddd;
+          }
+        });
+        hexagon.on('pointerout', function (this: Hexagon) {
+          if (!this.inUse) {
+            this.fillColor = 0xbbbbbb;
+          }
         });
       }
     }
@@ -142,11 +156,14 @@ class MainScene extends Phaser.Scene {
   getHexagonPosition(i: number, j: number, hexSize: number) {
     return [2 * j + 1.2 * hexSize + i * hexSize + (1.8 * j + 1) * hexSize, 2 * i + 25 + (1.5 * i + 1) * hexSize];
   }
+
+
 }
 
 interface Hexagon extends Phaser.GameObjects.Polygon {
   row: number;
   col: number;
+  inUse: boolean;
 }
 
 
