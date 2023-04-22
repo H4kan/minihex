@@ -1,9 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import Phaser from 'phaser';
 
 @Component({
   selector: 'board',
   templateUrl: './board.component.html',
+  styleUrls: ['./board.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class BoardComponent implements OnInit {
 
@@ -13,8 +15,10 @@ export class BoardComponent implements OnInit {
     this.config = {
       type: Phaser.AUTO,
       height: 600,
-      width: 800,
-      scene: [MainScene]
+      width: 1000,
+      scene: [MainScene],
+      parent: 'game-container',
+      backgroundColor: '#312e2b'
     };
   }
   ngOnInit(): void {
@@ -27,46 +31,94 @@ class MainScene extends Phaser.Scene {
     super({ key: 'main' });
   }
   create() {
-    // Create a new graphics object
-    var graphics = this.add.graphics();
-
-    // Set the fill color and line style for the graphics object
-    graphics.fillStyle(0xffffff);
-    graphics.lineStyle(2, 0x000000);
 
     // Define the size and spacing of the hexagons
-    var hexSize = 50;
-    var hexSpacing = 3;
+    var hexSize = 30;
 
     // Define the number of rows and columns for the hexagon board
-    var numRows = 10;
-    var numCols = 10;
+    var numRows = 11;
+    var numCols = 11;
+
+    // Create a new graphics object
+    var horizontalBorderGraphics = this.add.graphics();
+
+    // Set the fill color and line style for the graphics object
+    horizontalBorderGraphics.fillStyle(0xffffff);
+    horizontalBorderGraphics.lineStyle(2, 0x312e2b);
+    // Draw borders
+    for (var row = 0; row < numRows; row++) {
+      var [x, y] = this.getHexagonPosition(row, 0, hexSize);
+      this.drawHexagon(horizontalBorderGraphics, x - 8, y + 5, hexSize);
+    }
+    for (var row = 0; row < numRows; row++) {
+      var [x, y] = this.getHexagonPosition(row, numCols - 1, hexSize);
+      this.drawHexagon(horizontalBorderGraphics, x + 8, y - 1, hexSize);
+    }
+
+    // Create a new graphics object
+    var verticalBorderGraphics = this.add.graphics();
+
+    // Set the fill color and line style for the graphics object
+    verticalBorderGraphics.fillStyle(0x000000);
+    verticalBorderGraphics.lineStyle(0, 0x312e2b);
+    // Draw borders
+    for (var col = 0; col < numCols; col++) {
+      var [x, y] = this.getHexagonPosition(0, col, hexSize);
+      this.drawHexagon(verticalBorderGraphics, x, y - 7, hexSize);
+    }
+    for (var col = 0; col < numCols; col++) {
+      var [x, y] = this.getHexagonPosition(numRows - 1, col, hexSize);
+      this.drawHexagon(verticalBorderGraphics, x, y + 10, hexSize);
+    }
+
 
     // Loop through each row and column to create the hexagon tiles
-    //for (var row = 0; row < numRows; row++) {
-    //  for (var col = 0; col < numCols; col++) {
-    //    // Calculate the position of the current hexagon tile
-    //    //var x = hexSpacing * Math.sqrt(3) * (col + 0.5 * (row % 2));
-    //    //var y = hexSpacing * 1.5 * row;
-    //    var x = col * 100;
-    //    var y = row * 100;
+    for (var row = 0; row < numRows; row++) {
+      for (var col = 0; col < numCols; col++) {
+        // Calculate the position of the current hexagon tile
+        var [x, y] = this.getHexagonPosition(row, col, hexSize);
+        // Draw the hexagon tile
 
-    //    // Draw the hexagon tile
-    //    this.drawHexagon(graphics, x, y, hexSize);
-    //  }
-    //}
-    this.drawHexagon(graphics, 0, 0, hexSize);
+        var points = [];
+        for (var i = 0; i < 6; i++) {
+          var angle = 2 * Math.PI / 6 * (i + 0.5);
+          var px = hexSize * Math.cos(angle);
+          var py = hexSize * Math.sin(angle);
+          points.push(px, py);
+        }
+        var hexagon = this.add.polygon(-4 + hexSize + x, 2 + hexSize + y, points, 0xbbbbbb, 1) as Hexagon;
+
+        // make shape interactive
+        hexagon.setInteractive(new Phaser.Geom.Polygon(points), Phaser.Geom.Polygon.Contains);
+
+        hexagon.row = row;
+        hexagon.col = col;
+        // add click event listener
+        hexagon.on('pointerdown', function (this: Hexagon) {
+          console.log('Hexagon clicked at (' + (this).col + ', ' + (this).row + ')');
+        });
+      }
+    }
+
+    // Draw labels
+    for (var row = 0; row < numRows; row++) {
+     this.add.text(2 * row + (1.2 + 1.8 * row) * hexSize, 0, String.fromCharCode(65 + row),
+        { fixedWidth: 2 * hexSize, align: 'center', color: '#5CDB95' });
+
+      this.add.text(0.3 * hexSize + row * hexSize, 2* row + 1.7 * hexSize + (1.5 * row) * hexSize, `${row + 1}`,
+        { align: 'center', color: '#5CDB95' });
+    }
   }
 
   preload() {
-    console.log('preload method');
+    //console.log('preload method');
   }
   update() {
-    console.log('update method');
+    //console.log('update method');
   }
 
   // Draw a hexagon shape using the graphics object
-   drawHexagon(graphics: Phaser.GameObjects.Graphics, x: number, y: number, size: number) {
+  drawHexagon(graphics: Phaser.GameObjects.Graphics, x: number, y: number, size: number) {
      // Calculate the points of the hexagon shape
      var points = [];
      for (var i = 0; i < 6; i++) {
@@ -86,6 +138,15 @@ class MainScene extends Phaser.Scene {
      graphics.fillPath();
      graphics.strokePath();
   }
+
+  getHexagonPosition(i: number, j: number, hexSize: number) {
+    return [2 * j + 1.2 * hexSize + i * hexSize + (1.8 * j + 1) * hexSize, 2 * i + 25 + (1.5 * i + 1) * hexSize];
+  }
+}
+
+interface Hexagon extends Phaser.GameObjects.Polygon {
+  row: number;
+  col: number;
 }
 
 
