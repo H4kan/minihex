@@ -1,0 +1,38 @@
+<div id="user-settings">
+  <h3>
+    Settings
+  </h3> 
+  <div id="settings-form">
+    <div>
+      <p>Player 1</p>
+      <select name="player1" [(ngModel)]="player1Value">
+        <option *ngFor="let option of engineOptions" [value]="option.id"
+                [disabled]="option.id == 0 && player2Value == 0">{{ option.name }}</option>
+      </select>
+    </div>
+    <div>
+      <p>Player 2</p>
+      <select name="player2" [(ngModel)]="player2Value">
+        <option *ngFor="let option of engineOptions" [value]="option.id"
+                [disabled]="option.id == 0 && player1Value == 0">{{ option.name }}</option>
+      </select>
+    </div>
+    <div>
+      <p>Variant</p>
+      <select name="variant" [(ngModel)]="variantValue">
+        <option *ngFor="let option of variantOptions" [value]="option.id">
+          {{ option.name }}
+        </option>
+      </select>
+    </div>
+    <div>
+      <p>Delay (ms)</p>
+      <input type="number" min="500" max="10000" [(ngModel)]="delayValue" (blur)="onDelayValueChange()"/>
+    </div>
+    <div>
+      <button>Start</button>
+    </div>
+  </div>
+  
+</div>
+

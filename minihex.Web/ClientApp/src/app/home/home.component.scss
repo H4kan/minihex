@@ -7,6 +7,20 @@ body {
   color: #5CDB95;
 }
 
-canvas {
-    z-index: 10;
+#game-section {
+    display: flex;
+    justify-content: space-evenly;
+    min-width: 1600px;
 }
+
+#user-settings {
+    width: 400px;
+    flex-shrink: 0;
+
+}
+
+#game-container {
+    flex-shrink: 0;
+}
+
+

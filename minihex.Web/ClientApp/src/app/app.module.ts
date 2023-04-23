@@ -7,12 +7,16 @@ import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { BoardComponent } from './board/board.component';
+import { BoardService } from './board/board.service';
+import { CommunicationService } from './communication/communication.service';
+import { UserSettingsComponent } from './user-settings/user-settings.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
-    BoardComponent
+    BoardComponent,
+    UserSettingsComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -22,7 +26,7 @@ import { BoardComponent } from './board/board.component';
       { path: '', component: HomeComponent, pathMatch: 'full' },
     ])
   ],
-  providers: [],
+  providers: [BoardService, CommunicationService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

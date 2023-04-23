@@ -1,5 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import Phaser from 'phaser';
+import { PlayerColor, WinningPathInfo } from '../communication/communication.service';
+import { BoardService } from './board.service';
 
 @Component({
   selector: 'board',
@@ -11,33 +13,47 @@ export class BoardComponent implements OnInit {
 
   phaserGame: Phaser.Game | undefined;
   config: Phaser.Types.Core.GameConfig;
-  constructor() {
+  scene: MainScene | undefined;
+  
+  constructor(private boardService: BoardService) {
     this.config = {
       type: Phaser.AUTO,
       height: 600,
       width: 1000,
-      scene: [MainScene],
+      plugins: {
+        scene: [{
+          key: 'MainScene',
+          plugin: Phaser.Scenes.ScenePlugin,
+          mapping: 'MainScene'
+        }]
+      },
       parent: 'game-container',
       backgroundColor: '#312e2b'
     };
   }
   ngOnInit(): void {
     this.phaserGame = new Phaser.Game(this.config);
+    this.phaserGame.scene.add('MainScene', createMainScene.bind(null, { key: 'MainScene' }, this.boardService), true);
   }
 }
 
-class MainScene extends Phaser.Scene {
-  constructor() {
-    super({ key: 'main' });
+export class MainScene extends Phaser.Scene {
+
+  hexagons: Hexagon[] = [];
+  hexSize = 30;
+  boardService: BoardService;
+
+  constructor(config: any, boardService: BoardService) {
+    super(config);
+    this.boardService = boardService;
   }
   create() {
-
-    // Define the size and spacing of the hexagons
-    var hexSize = 30;
-
     // Define the number of rows and columns for the hexagon board
-    var numRows = 11;
-    var numCols = 11;
+    var numRows = this.boardService.gameConfig.size;
+    var numCols = this.boardService.gameConfig.size;
+    
+    var hexSize = this.hexSize;
+    var boardService = this.boardService;
 
     // Create a new graphics object
     var horizontalBorderGraphics = this.add.graphics();
@@ -87,27 +103,27 @@ class MainScene extends Phaser.Scene {
           points.push(px, py);
         }
         var hexagon = this.add.polygon(-4 + hexSize + x, 2 + hexSize + y, points, 0xbbbbbb, 1) as Hexagon;
-
+        this.hexagons.push(hexagon);
         // make shape interactive
         hexagon.setInteractive(new Phaser.Geom.Polygon(points), Phaser.Geom.Polygon.Contains);
 
         hexagon.row = row;
         hexagon.col = col;
-        hexagon.inUse = false;
+        hexagon.inUse = !boardService.gameConfig.playerInvolve;
         // add click event listener
         hexagon.on('pointerdown', function (this: Hexagon) {
-          if (!this.inUse) {
-            this.scene.add.circle(this.x - hexSize + 3, this.y - hexSize, hexSize / 2, 0x000000);
-            this.inUse = true;
+          if ((!this.inUse || (boardService.gameConfig.swapVariant && boardService.moveCounter == 1))
+            && !boardService.shouldServerMove()) {
+            boardService.makeMove(this.row * numCols + this.col, false);
           }
         });
         hexagon.on('pointerover', function (this: Hexagon) {
-          if (!this.inUse) {
+          if (!this.inUse || (boardService.gameConfig.swapVariant && boardService.moveCounter == 1)) {
             this.fillColor = 0xdddddd;
           }
         });
         hexagon.on('pointerout', function (this: Hexagon) {
-          if (!this.inUse) {
+          if (!this.inUse || (boardService.gameConfig.swapVariant && boardService.moveCounter == 1)) {
             this.fillColor = 0xbbbbbb;
           }
         });
@@ -122,13 +138,32 @@ class MainScene extends Phaser.Scene {
       this.add.text(0.3 * hexSize + row * hexSize, 2* row + 1.7 * hexSize + (1.5 * row) * hexSize, `${row + 1}`,
         { align: 'center', color: '#5CDB95' });
     }
+
+    // add event to update from external
+    this.boardService.outMoveEvent.subscribe(fieldIdx => {
+      var selected = this.hexagons[fieldIdx];
+      var color = this.boardService.nextColor == PlayerColor.White ? 0xffffff : 0x000000;
+      selected.scene.add.circle(selected.x - hexSize + 3, selected.y - hexSize, hexSize / 2, color);
+      selected.inUse = true;
+    })
+
+    this.boardService.finishGameEvent.subscribe((info: WinningPathInfo) => {
+      for (let i = 0; i < this.hexagons.length; i++) {
+        this.hexagons[i].inUse = true;
+      }
+      for (let i = 0; i < info.path.length; i++) {
+        this.hexagons[info.path[i]].fillColor = 0x33cc33;
+      }
+    })
+
+    if (!this.boardService.gameConfig.playerStart) {
+      this.boardService.getServerMove();
+    }
   }
 
   preload() {
-    //console.log('preload method');
   }
   update() {
-    //console.log('update method');
   }
 
   // Draw a hexagon shape using the graphics object
@@ -157,7 +192,10 @@ class MainScene extends Phaser.Scene {
     return [2 * j + 1.2 * hexSize + i * hexSize + (1.8 * j + 1) * hexSize, 2 * i + 25 + (1.5 * i + 1) * hexSize];
   }
 
+}
 
+function createMainScene(config: any, customParam: BoardService) {
+  return new MainScene(config, customParam);
 }
 
 interface Hexagon extends Phaser.GameObjects.Polygon {
@@ -165,6 +203,5 @@ interface Hexagon extends Phaser.GameObjects.Polygon {
   col: number;
   inUse: boolean;
 }
-
 
 
