@@ -1,4 +1,4 @@
-body {
+body, canvas, #game-container {
   background-color: #312e2b;
 
 }
@@ -23,4 +23,7 @@ body {
     flex-shrink: 0;
 }
 
-
+main {
+    position: relative;
+    min-width: 1600px;
+}

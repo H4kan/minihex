@@ -1,4 +1,6 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { GameVariant, Algorithm } from '../communication/communication.service';
+import { UserSettingsService } from './user-settings.service';
 
 @Component({
   selector: 'user-settings',
@@ -9,50 +11,16 @@ import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 
 export class UserSettingsComponent implements OnInit {
 
-  engineOptions: DropDownOption[] = [
-    {
-      id: 0,
-      name: "Human"
-    },
-    {
-      id: 1,
-      name: "Heuristic"
-    },
-    {
-      id: 2,
-      name: "MCTS"
-    },
-    {
-      id: 3,
-      name: "MCTS with AMAF"
-    },
-    {
-      id: 4,
-      name: "MCTS with Savebridge"
-    },
-    {
-      id: 5,
-      name: "MCTS with AMAF and Savebridge"
-    }
-  ]
-
-  variantOptions = [
-    {
-      id: 0,
-      name: "Basic"
-    },
-    {
-      id: 1,
-      name: "SWAP"
-    },
-  ]
+  engineOptions = this.userSettingsService.engineOptions;
+  variantOptions = this.userSettingsService.variantOptions;
 
   variantValue: number;
   player1Value: number;
   player2Value: number;
   delayValue: number;
+  sizeValue: number;
 
-  constructor() {
+  constructor(private userSettingsService: UserSettingsService) {
 
   }
 
@@ -66,6 +34,7 @@ export class UserSettingsComponent implements OnInit {
     this.player2Value = 5;
     this.variantValue = 0;
     this.delayValue = 1000;
+    this.sizeValue = 8;
 
   }
 
@@ -73,9 +42,24 @@ export class UserSettingsComponent implements OnInit {
     if (this.delayValue < 500) this.delayValue = 500;
     if (this.delayValue > 10000) this.delayValue = 10000;
   }
+
+  onSizeValueChange() {
+    if (this.sizeValue < 5) this.sizeValue = 5;
+    if (this.sizeValue > 11) this.sizeValue = 11;
+  }
+
+  submit() {
+    this.userSettingsService.submitSettings({
+
+      player1Variant: this.player1Value as Algorithm,
+      player2Variant: this.player2Value as Algorithm,
+      variant: this.variantValue as GameVariant,
+      delay: this.delayValue,
+      size: this.sizeValue
+
+      })
+  }
+
 }
 
-interface DropDownOption {
-  id: number;
-  name: string;
-}
+

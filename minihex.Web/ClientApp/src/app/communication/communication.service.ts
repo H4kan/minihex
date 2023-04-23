@@ -6,60 +6,65 @@ import { Subject } from 'rxjs';
 })
 export class CommunicationService {
 
-  i = 0;
+  // remove this when there is actual logic
+  j = 0;
+
   // call server to start game with some setup
   // returns some game id
-  beginGame(request: BeginGameRequest): number {
-    return 0;
+  beginGame(request: UserSettings): Promise<string> {
+    return new Promise((resolve) => {
+      resolve((this.j++) + "");
+    });
   }
 
   // get next move in some position
   // returns index of field on board
-  getNextMove(gameId: number, moveNumber: number): Promise<NextMoveInfo> {
+  getNextMove(gameId: string, moveNumber: number): Promise<NextMoveInfo> {
+    console.log("get" + moveNumber);
     return new Promise((resolve) => {
       resolve({
-        fieldIdx: this.i++,
-        status: this.i < 5 ? GameStatus.InProgress : GameStatus.Finished
+        fieldIdx: moveNumber,
+        status: moveNumber < 5 ? GameStatus.InProgress : GameStatus.Finished,
+        gameId
       })
     }); 
   }
 
   // informs server about move made
-  makeNextMove(gameId: number, fieldIdx: number, moveNumber: number): Promise<NextMoveInfo> {
+  makeNextMove(gameId: string, fieldIdx: number, moveNumber: number): Promise<NextMoveInfo> {
+    console.log("make" + moveNumber);
     return new Promise((resolve) => {
       resolve({
         fieldIdx: fieldIdx,
-        status: this.i < 5 ? GameStatus.InProgress : GameStatus.Finished
+        status: moveNumber < 5? GameStatus.InProgress : GameStatus.Finished,
+        gameId
       })
     }); 
   }
 
   // after game ends
   // should return who won and winning path
-  getWinningPath(gameId: number): Promise<WinningPathInfo> {
+  getWinningPath(gameId: string): Promise<WinningPathInfo> {
     return new Promise((resolve) => {
       resolve({
         colorWon: PlayerColor.Black,
-        path: [0, 1, 2, 3, 4, 5]
+        path: [0, 1, 2, 3, 4, 5],
+        gameId
       })
     })
   }
 }
 
-
-// TODO: fill this
-interface BeginGameRequest {
-  variant: AlgorithmVariant;
-}
-
 export interface NextMoveInfo {
   fieldIdx: number;
-  status: GameStatus
+  status: GameStatus,
+  gameId: string
 }
 
 export interface WinningPathInfo {
   colorWon: PlayerColor,
-  path: number[]
+  path: number[],
+  gameId: string
 }
 
 export enum GameStatus {
@@ -72,10 +77,34 @@ export enum PlayerColor {
   Black = 1
 }
 
-enum AlgorithmVariant {
+export interface UserSettings {
+
+  player1Variant: Algorithm;
+
+  player2Variant: Algorithm;
+
+  variant: GameVariant;
+
+  size: number;
+
+  delay: number;
+
+}
+
+export enum Algorithm {
+
+  Human = 0,
   Heuristic = 1,
   MCTS = 2,
-  AMAF = 3,
-  Savebridge = 4,
-  AMAFSavebridge = 5
+  MSTSwAMAF = 3,
+  MCTSwSavebridge = 4,
+  MCTSwAMAFandSavebridge = 5
+
+}
+
+export enum GameVariant {
+
+  Basic = 0,
+  SWAP = 1
+
 }

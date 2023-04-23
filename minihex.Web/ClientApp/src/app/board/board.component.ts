@@ -20,6 +20,7 @@ export class BoardComponent implements OnInit {
       type: Phaser.AUTO,
       height: 600,
       width: 1000,
+      transparent: true,
       plugins: {
         scene: [{
           key: 'MainScene',
@@ -32,8 +33,15 @@ export class BoardComponent implements OnInit {
     };
   }
   ngOnInit(): void {
-    this.phaserGame = new Phaser.Game(this.config);
-    this.phaserGame.scene.add('MainScene', createMainScene.bind(null, { key: 'MainScene' }, this.boardService), true);
+
+    this.boardService.startGameEvent.subscribe(() => {
+      if (this.phaserGame) {
+        this.phaserGame.destroy(true);
+      }
+      this.phaserGame = new Phaser.Game(this.config);
+      this.phaserGame.scene.add('MainScene', createMainScene.bind(null, { key: 'MainScene' }, this.boardService), true);
+    });
+    
   }
 }
 
@@ -48,6 +56,7 @@ export class MainScene extends Phaser.Scene {
     this.boardService = boardService;
   }
   create() {
+    this.hexagons = [];
     // Define the number of rows and columns for the hexagon board
     var numRows = this.boardService.gameConfig.size;
     var numCols = this.boardService.gameConfig.size;
@@ -157,7 +166,7 @@ export class MainScene extends Phaser.Scene {
     })
 
     if (!this.boardService.gameConfig.playerStart) {
-      this.boardService.getServerMove();
+      this.boardService.getServerMove(this.boardService.gameId);
     }
   }
 
