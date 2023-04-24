@@ -8,7 +8,7 @@ namespace minihex.Web.Models.Responses
 
         public Guid GameId { get; set; }
 
-        public GameStatus GameStatus { get; set; }
+        public GameStatus Status { get; set; }
     }
 
 }

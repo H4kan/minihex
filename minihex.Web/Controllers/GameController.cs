@@ -26,7 +26,7 @@ namespace Project1.Controllers
             return new MoveInfoResponse()
             {
                 FieldIdx = request.MoveNumber,
-                GameStatus = request.MoveNumber < 5 ? GameStatus.InProgress : GameStatus.Finished,
+                Status = request.MoveNumber < 5 ? GameStatus.InProgress : GameStatus.Finished,
                 GameId = request.GameId
             };
         }
@@ -37,7 +37,7 @@ namespace Project1.Controllers
             return new MoveInfoResponse()
             {
                 FieldIdx = request.FieldIdx,
-                GameStatus = request.MoveNumber < 5 ? GameStatus.InProgress : GameStatus.Finished,
+                Status = request.MoveNumber < 5 ? GameStatus.InProgress : GameStatus.Finished,
                 GameId = request.GameId
             };
         }

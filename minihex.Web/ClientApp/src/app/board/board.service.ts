@@ -47,9 +47,10 @@ export class BoardService {
     this.nextColor = this.nextColor == PlayerColor.White ? PlayerColor.Black : PlayerColor.White;
     this.outMoveEvent.next(fieldIdx);
     if (!serverSide) {
-      this.communicationService.makeNextMove(this.gameId, fieldIdx, ++this.moveCounter)
+      this.communicationService.makeNextMove(this.gameId, fieldIdx, this.moveCounter + 1)
         .then((info: NextMoveInfo) => {
           if (this.gameId !== info.gameId) return;
+          this.moveCounter++;
           if (info.status == GameStatus.Finished) {
             this.gameStatus = info.status;
             this.finishGame();
@@ -73,9 +74,10 @@ export class BoardService {
   }
 
   getServerMove(gameId: string) {
-    this.communicationService.getNextMove(gameId, ++this.moveCounter)
+    this.communicationService.getNextMove(gameId, this.moveCounter + 1)
       .then((info: NextMoveInfo) => {
         if (this.gameId === info.gameId) {
+          this.moveCounter++;
           this.gameStatus = info.status;
           this.makeMove(info.fieldIdx, true);
           if (this.gameStatus == GameStatus.Finished) this.finishGame();
@@ -105,6 +107,7 @@ export class BoardService {
     this.gameConfig = config;
     this.moveCounter = 0;
     this.nextColor = PlayerColor.Black;
+    this.gameStatus = GameStatus.InProgress;
     this.startGameEvent.next(0);
   }
 }
