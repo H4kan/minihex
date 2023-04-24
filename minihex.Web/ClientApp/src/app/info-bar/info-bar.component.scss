@@ -1,0 +1,21 @@
+
+
+#info-bar {
+    width: 1600px;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+
+    margin-top: 50px;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 20px;
+}
+
+span {
+    width: 100px;
+    color: white;
+}
+

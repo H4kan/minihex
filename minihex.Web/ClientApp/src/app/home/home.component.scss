@@ -1,0 +1,29 @@
+body, canvas, #game-container {
+  background-color: #312e2b;
+
+}
+
+* {
+  color: #5CDB95;
+}
+
+#game-section {
+    display: flex;
+    justify-content: space-evenly;
+    min-width: 1600px;
+}
+
+#user-settings {
+    width: 400px;
+    flex-shrink: 0;
+
+}
+
+#game-container {
+    flex-shrink: 0;
+}
+
+main {
+    position: relative;
+    min-width: 1600px;
+}

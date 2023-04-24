@@ -1,0 +1,50 @@
+
+#user-settings {
+  border: 3px solid #5CDB95;
+  border-radius: 10px;
+  /*height: 30vh;*/
+
+  * {
+    color: #bbbbbb;
+  }
+
+  h3 {
+    padding: 20px;
+    padding-bottom: 0;
+    border-bottom: 2px solid #5CDB95;
+  }
+}
+
+#settings-form {
+  padding: 20px;
+
+  p {
+      margin-bottom: 2px;
+  }
+}
+
+#settings-form > div {
+  margin-bottom: 35px;
+
+  select, option, input {
+      color: black;
+      width: 100%;
+  }
+
+  button {
+    margin-top: 15px;
+    background-color: black;
+    color: #5CDB95;
+    border-style: none;
+    padding: 15px 25px;
+    width: 100%;
+    border-radius: 10px;
+    text-transform: uppercase;
+    transition: 0.5s;
+  }
+
+  button:hover {
+    background-color: #5CDB95;
+    color: black;
+  }
+}
