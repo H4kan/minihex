@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Inject, Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 
 @Injectable({
@@ -6,52 +7,74 @@ import { Subject } from 'rxjs';
 })
 export class CommunicationService {
 
-  // remove this when there is actual logic
-  j = 0;
+  baseUrl: string;
+
+  constructor(private http: HttpClient, @Inject('BASE_URL') baseUrl: string) {
+    this.baseUrl = baseUrl + "game/";
+  }
 
   // call server to start game with some setup
   // returns some game id
   beginGame(request: UserSettings): Promise<string> {
+
+
+
     return new Promise((resolve) => {
-      resolve((this.j++) + "");
+      this.http.post<GameIdentificator>(this.baseUrl + "beginGame", request)
+        .subscribe((gameIdentificator: GameIdentificator) => {
+          resolve(gameIdentificator.gameId);
+        })
     });
   }
 
   // get next move in some position
   // returns index of field on board
   getNextMove(gameId: string, moveNumber: number): Promise<NextMoveInfo> {
-    console.log("get" + moveNumber);
+
+    let request: GetMoveRequest = {
+      gameId,
+      moveNumber
+    }
+
     return new Promise((resolve) => {
-      resolve({
-        fieldIdx: moveNumber,
-        status: moveNumber < 5 ? GameStatus.InProgress : GameStatus.Finished,
-        gameId
-      })
-    }); 
+      this.http.post<NextMoveInfo>(this.baseUrl + "getMove", request)
+        .subscribe((response: NextMoveInfo) => {
+          resolve(response);
+        })
+    });
   }
 
   // informs server about move made
   makeNextMove(gameId: string, fieldIdx: number, moveNumber: number): Promise<NextMoveInfo> {
-    console.log("make" + moveNumber);
+
+    let request: MakeMoveRequest = {
+      gameId,
+      moveNumber,
+      fieldIdx
+    }
+
     return new Promise((resolve) => {
-      resolve({
-        fieldIdx: fieldIdx,
-        status: moveNumber < 5? GameStatus.InProgress : GameStatus.Finished,
-        gameId
-      })
-    }); 
+      this.http.post<NextMoveInfo>(this.baseUrl + "makeMove", request)
+        .subscribe((response: NextMoveInfo) => {
+          resolve(response);
+        })
+    });
   }
 
   // after game ends
   // should return who won and winning path
   getWinningPath(gameId: string): Promise<WinningPathInfo> {
+
+    let request: GameIdentificator = {
+      gameId
+    }
+
     return new Promise((resolve) => {
-      resolve({
-        colorWon: PlayerColor.Black,
-        path: [0, 1, 2, 3, 4, 5],
-        gameId
-      })
-    })
+      this.http.post<WinningPathInfo>(this.baseUrl + "getWinningPath", request)
+        .subscribe((response: WinningPathInfo) => {
+          resolve(response);
+        })
+    });
   }
 }
 
@@ -107,4 +130,22 @@ export enum GameVariant {
   Basic = 0,
   SWAP = 1
 
+}
+
+interface GetMoveRequest {
+
+  gameId: string;
+  moveNumber: number;
+
+}
+
+interface MakeMoveRequest {
+
+  gameId: string;
+  moveNumber: number;
+  fieldIdx: number;
+}
+
+interface GameIdentificator {
+  gameId: string;
 }

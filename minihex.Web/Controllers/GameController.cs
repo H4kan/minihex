@@ -1,4 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using minihex.Web.Models.Requests;
+using minihex.Web.Models.Responses;
+using minihex.Web.Models.Enums;
+using minihex.Web.Models;
 
 namespace Project1.Controllers
 {
@@ -6,29 +10,47 @@ namespace Project1.Controllers
     [Route("[controller]")]
     public class GameController : ControllerBase
     {
-
+        // returns new, non-repeatable gameId
         [HttpPost("beginGame")]
-        public string BeginGame()
+        public GameIdentificator BeginGame(BeginGameRequest request)
         {
-            return Guid.NewGuid().ToString();
+            return new GameIdentificator()
+            {
+                GameId = Guid.NewGuid(),
+            };
         }
 
-        [HttpGet("getMove")]
-        public string GetMove()
+        [HttpPost("getMove")]
+        public MoveInfoResponse GetMove(GetMoveRequest request)
         {
-            return Guid.NewGuid().ToString();
+            return new MoveInfoResponse()
+            {
+                FieldIdx = request.MoveNumber,
+                GameStatus = request.MoveNumber < 5 ? GameStatus.InProgress : GameStatus.Finished,
+                GameId = request.GameId
+            };
         }
 
         [HttpPost("makeMove")]
-        public string MakeMove()
+        public MoveInfoResponse MakeMove(MakeMoveRequest request)
         {
-            return Guid.NewGuid().ToString();
+            return new MoveInfoResponse()
+            {
+                FieldIdx = request.FieldIdx,
+                GameStatus = request.MoveNumber < 5 ? GameStatus.InProgress : GameStatus.Finished,
+                GameId = request.GameId
+            };
         }
 
-        [HttpGet("getWinningPath")]
-        public string GetWinningPath()
+        [HttpPost("getWinningPath")]
+        public GetWinnigPathResponse GetWinningPath(GameIdentificator request)
         {
-            return Guid.NewGuid().ToString();
+            return new GetWinnigPathResponse()
+            {
+                GameId = request.GameId,
+                ColorWon = PlayerColor.White,
+                Path = new List<int>() { 1, 2, 3, 4, 5 }
+            };
         }
     }
 }
