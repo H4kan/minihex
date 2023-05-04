@@ -1,4 +1,4 @@
-﻿namespace minihex.Web.Models.Enums
+﻿namespace minihex.engine.Models.Enums
 {
     public enum Algorithm
     {

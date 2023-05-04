@@ -1,4 +1,5 @@
-﻿using minihex.Web.Models.Enums;
+﻿using minihex.engine.Models.Enums;
+using minihex.Web.Models.Enums;
 
 namespace minihex.Web.Models.Requests
 {
