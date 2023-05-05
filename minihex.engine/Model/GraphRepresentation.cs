@@ -1,9 +1,7 @@
 ﻿using minihex.engine.Model.Enums;
+using QuikGraph;
+using QuikGraph.Algorithms;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace minihex.engine.Model
 {
@@ -27,6 +25,8 @@ namespace minihex.engine.Model
 
         private PlayerColor TargerColor { get; set; }
         private byte TargetMask { get; set; }
+
+        private List<int> WinningPath { get; set; }
 
         public GraphRepresentation(int size, PlayerColor targerColor)
         {
@@ -103,9 +103,13 @@ namespace minihex.engine.Model
             }
         }
 
-        private void ColorVertice(int i, PlayerColor color)
+        public void ColorVertice(int i, PlayerColor color)
         {
             this.Vertices[i] = color;
+            if (color != TargerColor)
+            {
+                this.KillVertice(i);
+            }
         }
 
         // move all edges from neighbouring colored to new colored and "delete" all colored neighbours
@@ -114,18 +118,8 @@ namespace minihex.engine.Model
             this.ColorVertice(i, color);
             
             // isolate diff color vertice and kill it
-            if (color != TargerColor)
-            {
-                for (int j = 0; j < Size * Size; j++)
-                {
-                    if (!DeadVertice[j] && Edges[i, j] == 1)
-                    {
-                        this.RemoveEdge(i, j);
-                    }
-                }
-                this.DeadVertice[i] = true;
-            }
-            else
+           
+            if (color == TargerColor)
             {
                 // iterate over neighbours of i
                 for (int j = 0; j < Size * Size; j++)
@@ -159,6 +153,179 @@ namespace minihex.engine.Model
             }
 
             return false;
+        }
+
+        //public List<int> FindPath(bool includeNonColor)
+        //{
+        //    if (includeNonColor)
+        //    {
+
+        //    }
+        //    var grCopy = this.CopyOut();
+
+        //    return grCopy.FindPathDestructive(includeNonColor);
+        //}
+
+        public List<int> FindPathDestructive(bool includeNonColor)
+        {
+            if (this.WinningPath != null)
+            {
+                return this.WinningPath;
+            }
+
+            int source = -1, target = -1;
+
+            Func<Edge<int>, double> wFunc;
+
+            if (!includeNonColor)
+            {
+                this.KillNonColor();
+
+                int i = 0;
+                int offset = TargerColor == PlayerColor.White ? Size : 1;
+                while(source < 0)
+                {
+                    if (!this.DeadVertice[i])
+                    {
+                        source = i;
+                    }
+                    i += offset;
+                }
+                i = TargerColor == PlayerColor.White ? Size - 1 : Size * (Size - 1);
+                while (target < 0)
+                {
+                    if (!this.DeadVertice[i])
+                    {
+                        target = i;
+                    }
+                    i += offset;
+                }
+
+
+                wFunc = (e) =>
+                {
+                    return (this.SideVertices[e.Source] & this.SideVertices[e.Target] & TargetMask) > 0 ? 0 : 1;
+                };
+            }
+            else
+            {
+                wFunc = (e) =>
+                {
+                    return GetWeight(e.Source, e.Target);
+                };
+            }
+
+            var g = this.MakeWeightedGraph();
+
+            var func = g.ShortestPathsDijkstra(wFunc, source);
+
+            func(target, out IEnumerable<Edge<int>> path);
+
+            var result = new List<int>();
+
+            foreach (Edge<int> e in path)
+            {
+                result.Add(e.Source);
+                result.Add(e.Target);
+         
+            }
+
+            this.WinningPath = result.Distinct().ToList();
+
+            return this.WinningPath;
+        }
+
+
+
+        private UndirectedGraph<int, Edge<int>> MakeWeightedGraph()
+        {
+            var graph = new UndirectedGraph<int, Edge<int>>(false);
+
+            graph.AddVertexRange(Enumerable.Range(0, Size * Size));
+
+
+            for (int i = 0; i < Size * Size; i++)
+            {
+                if (this.DeadVertice[i]) continue;
+                for (int j = 0; j < Size * Size; j++)
+                {
+                    if (!this.DeadVertice[j] && this.Edges[i, j] == 1)
+                    {
+                        graph.AddEdge(new Edge<int>(i, j));
+                    }
+                }
+            }
+
+            return graph;
+        }
+
+        private byte GetWeight(int i, int j)
+        {
+            byte result = 0;
+            if (this.Vertices[i] == PlayerColor.None
+                && this.Vertices[j] == PlayerColor.None)
+                result = 2;
+            else
+            {
+                result = 1;
+            }
+
+            if ((this.SideVertices[i] & this.TargetMask) > 0 && this.Vertices[i] == PlayerColor.None
+                || (this.SideVertices[j] & this.TargetMask) > 0 && this.Vertices[j] == PlayerColor.None)
+            {
+                result++;
+            }
+
+            return result;
+        }
+
+
+        private void KillNonColor()
+        {
+            for (int i = 0; i < Size * Size; i++)
+            {
+                if (this.Vertices[i] == PlayerColor.None)
+                {
+                    this.KillVertice(i);
+                }
+            }
+        }
+
+        private void KillVertice(int vertIdx)
+        {
+            for (int j = 0; j < Size * Size; j++)
+            {
+                if (!DeadVertice[j] && Edges[vertIdx, j] == 1)
+                {
+                    this.RemoveEdge(vertIdx, j);
+                }
+            }
+            this.DeadVertice[vertIdx] = true;
+        }
+
+        public void CopyIn(byte [,] edges, PlayerColor[] vertices, byte[] sideVertices, bool[] deadVertice)
+        {
+            for (int i = 0; i < Size * Size; i++)
+            {
+                for (int j = 0; j < Size * Size; j++)
+                {
+                    this.Edges[i, j] = edges[i, j];
+                }
+
+                this.Vertices[i] = vertices[i];
+                this.SideVertices[i] = sideVertices[i];
+                this.DeadVertice[i] = deadVertice[i];
+            }
+        }
+
+        public GraphRepresentation CopyOut()
+        {
+            var gr = new GraphRepresentation(this.Size, this.TargerColor);
+
+            gr.CopyIn(this.Edges, this.Vertices, this.SideVertices, this.DeadVertice);
+
+            return gr;
+
         }
 
     }
