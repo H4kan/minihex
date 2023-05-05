@@ -10,5 +10,10 @@ namespace minihex.engine.Engine.Engines
     public class MctsEngine : BaseEngine
     {
         public MctsEngine(Game game) : base(game) { }
+
+        public override int GetNextMove(int moveNumber)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -5,17 +5,17 @@ namespace minihex.engine.Model
     public class Game
     {
 
-        private PlayerColor[,] _board;
+        public PlayerColor[,] board;
 
-        private List<int> _moves;
+        protected List<int> _moves;
 
-        private int _size;
+        public int Size;
 
         public Game(int size, bool swap)
         {
-            this._board = new PlayerColor[size, size];
+            this.board = new PlayerColor[size, size];
             this._moves = new List<int>();
-            this._size = size;
+            this.Size = size;
         }
 
 
@@ -23,7 +23,7 @@ namespace minihex.engine.Model
         {
             if (_moves.Count == moveNumber - 1)
             {
-                this._board[fieldIdx / _size, fieldIdx % _size] = 
+                this.board[fieldIdx / Size, fieldIdx % Size] = 
                     moveNumber % 2 == 0 ? PlayerColor.Black : PlayerColor.White;
                 _moves.Add(fieldIdx);
             }

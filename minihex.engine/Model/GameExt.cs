@@ -16,9 +16,9 @@ namespace minihex.engine.Model
         }
 
 
-        public bool IsFinished()
+        public bool IsFinished(int moveNumber)
         {
-            return _isFinished;
+            return _isFinished && base._moves.Count == moveNumber;
         }
 
 
@@ -34,7 +34,8 @@ namespace minihex.engine.Model
 
         public (List<int>, PlayerColor) GetWinningPath()
         {
-            return (new List<int>() { 1, 2, 3, 4, 5 }, PlayerColor.Black);
+            var winningColor = this._whiteRepresentation.IsGameFinished() ? PlayerColor.White : PlayerColor.Black;
+            return (new List<int>() { 1, 2, 3, 4, 5 }, winningColor);
         }
     }
 }

@@ -66,15 +66,15 @@ namespace minihex.engine.Engine
             engineProcessTokenSource = new CancellationTokenSource();
             Task.Run(() =>
             {
-                while (!Game.IsFinished())
+                while (!Game.IsFinished(_moveNumber))
                 {
-                    this.Engine1.Process();
-                    this.SetReady(++_moveNumber);
+                    this.Engine1.Process(++_moveNumber);
+                    this.SetReady(_moveNumber);
                     this.engineProcessTokenSource.Token.ThrowIfCancellationRequested();
-                    if (!Game.IsFinished())
+                    if (!Game.IsFinished(_moveNumber))
                     {
-                        this.Engine2.Process();
-                        this.SetReady(++_moveNumber);
+                        this.Engine2.Process(++_moveNumber);
+                        this.SetReady(_moveNumber);
                         this.engineProcessTokenSource.Token.ThrowIfCancellationRequested();
                     }
                 }
@@ -86,14 +86,14 @@ namespace minihex.engine.Engine
             engineProcessTokenSource = new CancellationTokenSource();
             Task.Run(() =>
             {
-                while (!Game.IsFinished())
+                while (!Game.IsFinished(_moveNumber))
                 {
          
-                    this.Engine1.Process();
-                    this.SetReady(++_moveNumber);
+                    this.Engine1.Process(++_moveNumber);
+                    this.SetReady(_moveNumber);
                     this.engineProcessTokenSource.Token.ThrowIfCancellationRequested();
                   
-                    if (!Game.IsFinished())
+                    if (!Game.IsFinished(_moveNumber))
                     {
                         this.WaitTillReady(++_moveNumber, true);
                     }
@@ -106,14 +106,14 @@ namespace minihex.engine.Engine
             engineProcessTokenSource = new CancellationTokenSource();
             Task.Run(() =>
             {
-                while (!Game.IsFinished())
+                while (!Game.IsFinished(_moveNumber))
                 {
                     this.WaitTillReady(++_moveNumber, true);
 
-                    if (!Game.IsFinished())
+                    if (!Game.IsFinished(_moveNumber))
                     {
-                        this.Engine2.Process();
-                        this.SetReady(++_moveNumber);
+                        this.Engine2.Process(++_moveNumber);
+                        this.SetReady(_moveNumber);
                         this.engineProcessTokenSource.Token.ThrowIfCancellationRequested();
 
                     }

@@ -14,11 +14,11 @@ namespace minihex.engine
                 case Algorithm.Human:
                     return null;
                 case Algorithm.Heuristic:
-                    return new HeuristicEngine(game);
+                    return new RandomEngine(game);
                 case Algorithm.MCTS:
-                    return new MctsEngine(game);
+                    return new RandomEngine(game);
                 default:
-                    return new HeuristicEngine(game);
+                    return new RandomEngine(game);
             }
         }
     }

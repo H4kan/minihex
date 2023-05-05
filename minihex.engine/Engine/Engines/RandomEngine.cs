@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 
 namespace minihex.engine.Engine.Engines
 {
-    public class HeuristicEngine : BaseEngine
+    // this exists only for test purposes
+    public class RandomEngine : BaseEngine
     {
-        public HeuristicEngine(Game game): base(game) { }
+        public RandomEngine(Game game): base(game) { }
 
 
         public override int GetNextMove(int moveNumber)

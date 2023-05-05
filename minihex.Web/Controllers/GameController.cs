@@ -22,6 +22,8 @@ namespace Project1.Controllers
 
             this._engineOrchestrator.SetupEngines(new SetupEngineRequest()
             {
+                Engine1 = request.Player1Variant,
+                Engine2 = request.Player2Variant,
                 Swap = request.Variant == GameVariant.SWAP,
                 Size = request.Size,
             });
@@ -40,7 +42,7 @@ namespace Project1.Controllers
             return new MoveInfoResponse()
             {
                 FieldIdx = this._engineOrchestrator.Game.GetMove(request.MoveNumber),
-                Status = this._engineOrchestrator.Game.IsFinished() ? GameStatus.Finished : GameStatus.InProgress,
+                Status = this._engineOrchestrator.Game.IsFinished(request.MoveNumber) ? GameStatus.Finished : GameStatus.InProgress,
                 GameId = request.GameId
             };
         }
@@ -54,7 +56,7 @@ namespace Project1.Controllers
             return new MoveInfoResponse()
             {
                 FieldIdx = request.FieldIdx,
-                Status = this._engineOrchestrator.Game.IsFinished() ? GameStatus.Finished : GameStatus.InProgress,
+                Status = this._engineOrchestrator.Game.IsFinished(request.MoveNumber) ? GameStatus.Finished : GameStatus.InProgress,
                 GameId = request.GameId
             };
         }

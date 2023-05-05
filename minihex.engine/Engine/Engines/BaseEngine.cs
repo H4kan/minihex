@@ -18,12 +18,13 @@ namespace minihex.engine.Engine.Engines
         }
 
 
-        public virtual void Process()
+        public virtual void Process(int moveNumber)
         {
-         
-          
+            Game.MakeMove(this.GetNextMove(moveNumber), moveNumber);
 
         }
+
+        public abstract int GetNextMove(int moveNumber);
 
     }
 }
