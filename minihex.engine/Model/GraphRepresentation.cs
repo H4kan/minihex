@@ -223,14 +223,31 @@ namespace minihex.engine.Model
 
             var result = new List<int>();
 
+            bool skipFirst = true;
             foreach (Edge<int> e in path)
             {
-                result.Add(e.Source);
-                result.Add(e.Target);
-         
+                target = source == e.Source ? e.Target : e.Source;
+
+                if (skipFirst && (this.SideVertices[source] & this.SideVertices[target] & TargetMask) == 0)
+                {
+                    skipFirst = false;
+                }
+                if (!skipFirst)
+                {
+                    result.Add(source);
+
+                    if ((this.SideVertices[target] & TargetMask) > 0)
+                    {
+                        break;
+                    }
+                }
+
+                source = target;
             }
 
-            this.WinningPath = result.Distinct().ToList();
+            result.Add(target);
+
+            this.WinningPath = result;
 
             return this.WinningPath;
         }
