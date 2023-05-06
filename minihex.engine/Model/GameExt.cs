@@ -7,8 +7,8 @@ namespace minihex.engine.Model
 
         private bool _isFinished = false;
 
-        private GraphRepresentation _redWhiteRepresentation;
-        private GraphRepresentation _redBlackRepresentation;
+        public GraphRepresentation _redWhiteRepresentation;
+        public GraphRepresentation _redBlackRepresentation;
 
         private GraphRepresentation _whiteRepresentation;
         private GraphRepresentation _blackRepresentation;

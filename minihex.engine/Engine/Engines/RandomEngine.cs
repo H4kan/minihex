@@ -10,7 +10,7 @@ namespace minihex.engine.Engine.Engines
     // this exists only for test purposes
     public class RandomEngine : BaseEngine
     {
-        public RandomEngine(Game game): base(game) { }
+        public RandomEngine(GameExt game): base(game) { }
 
 
         public override int GetNextMove(int moveNumber)

@@ -10,10 +10,10 @@ namespace minihex.engine.Engine.Engines
     public abstract class BaseEngine
     {
 
-        protected Game Game { get; set; }
+        protected GameExt Game { get; set; }
         
 
-        public BaseEngine(Game game) {
+        public BaseEngine(GameExt game) {
             this.Game = game;
         }
 

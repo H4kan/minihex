@@ -7,14 +7,14 @@ namespace minihex.engine
 {
     public static partial class Helpers
     {
-        public static BaseEngine ToBaseEngine(Algorithm algorithm, Game game)
+        public static BaseEngine ToBaseEngine(Algorithm algorithm, GameExt game)
         {
             switch (algorithm)
             {
                 case Algorithm.Human:
                     return null;
                 case Algorithm.Heuristic:
-                    return new RandomEngine(game);
+                    return new HeuristicEngine(game);
                 case Algorithm.MCTS:
                     return new RandomEngine(game);
                 default:

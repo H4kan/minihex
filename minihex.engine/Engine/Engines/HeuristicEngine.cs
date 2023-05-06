@@ -9,23 +9,15 @@ namespace minihex.engine.Engine.Engines
 {
     public class HeuristicEngine : BaseEngine
     {
-        public HeuristicEngine(Game game): base(game) { }
+        public HeuristicEngine(GameExt game): base(game) { }
 
 
         public override int GetNextMove(int moveNumber)
         {
-            var freeList = new List<int>();
+            var whitePath = this.Game._redWhiteRepresentation.FindPathDestructive(true);
+            var blackPath = this.Game._redWhiteRepresentation.FindPathDestructive(true);
 
-            for (int i = 0; i < Game.board.Length; i++)
-            {
-                if (Game.board[i / Game.Size, i % Game.Size] == Model.Enums.PlayerColor.None)
-                    freeList.Add(i);
-            }
-            
-
-            var rnd = new Random().Next(0, freeList.Count);
-
-            return freeList[rnd];
+            return whitePath.Intersect(blackPath).First();
         }
     }
 }
