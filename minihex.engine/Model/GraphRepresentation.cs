@@ -305,6 +305,12 @@ namespace minihex.engine.Model
                 result++;
             }
 
+            if ((this.SideVertices[i] & this.SideVertices[j] & this.TargetMask) > 0)
+            {
+                result = 0;
+            }
+
+
             return result;
         }
 

@@ -15,7 +15,7 @@ namespace minihex.engine.Engine.Engines
         public override int GetNextMove(int moveNumber)
         {
             var whitePath = this.Game._redWhiteRepresentation.FindPathDestructive(true);
-            var blackPath = this.Game._redWhiteRepresentation.FindPathDestructive(true);
+            var blackPath = this.Game._redBlackRepresentation.FindPathDestructive(true);
 
             return whitePath.Intersect(blackPath).First();
         }
