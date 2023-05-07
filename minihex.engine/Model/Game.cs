@@ -19,7 +19,7 @@ namespace minihex.engine.Model
         }
 
 
-        public virtual void MakeMove(int fieldIdx, int moveNumber)
+        public virtual void MakeMove(int fieldIdx, int moveNumber, bool optimizeForEngine = false)
         {
             if (_moves.Count == moveNumber - 1)
             {
@@ -32,6 +32,11 @@ namespace minihex.engine.Model
         public int GetMove(int moveNumber)
         {
             return _moves[moveNumber - 1];
+        }
+
+        public List<int> GetPreMoves(int moveNumber)
+        {
+            return _moves.Take(moveNumber - 1).ToList();
         }
     }
 }

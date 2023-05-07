@@ -1,7 +1,7 @@
 ﻿using minihex.engine.Engine.Engines;
 using minihex.engine.Model;
 using minihex.engine.Model.Requests;
-
+using minihex.engine.Randoms;
 
 namespace minihex.engine.Engine
 {
@@ -23,7 +23,9 @@ namespace minihex.engine.Engine
 
         public Guid GameId { get; set; }
 
-        private EngineOrchestrator() { 
+        private EngineOrchestrator() {
+            RandomSource.SetSeed(0);
+
         }
 
         public void SetupEngines(SetupEngineRequest request)

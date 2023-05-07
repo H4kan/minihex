@@ -28,22 +28,30 @@ namespace minihex.engine.Model
         }
 
 
-        public override void MakeMove(int fieldIdx, int moveNumber)
+        public override void MakeMove(int fieldIdx, int moveNumber, bool optimizeForEngine = false)
         {
             base.MakeMove(fieldIdx, moveNumber);
 
             this._redWhiteRepresentation.ColorVerticeAndReduce(fieldIdx, moveNumber % 2 == 0 ? PlayerColor.Black : PlayerColor.White);
             this._redBlackRepresentation.ColorVerticeAndReduce(fieldIdx, moveNumber % 2 == 0 ? PlayerColor.Black : PlayerColor.White);
 
-            this._whiteRepresentation.ColorVertice(fieldIdx, moveNumber % 2 == 0 ? PlayerColor.Black : PlayerColor.White);
-            this._blackRepresentation.ColorVertice(fieldIdx, moveNumber % 2 == 0 ? PlayerColor.Black : PlayerColor.White);
+            if (!optimizeForEngine )
+            {
+                this._whiteRepresentation.ColorVertice(fieldIdx, moveNumber % 2 == 0 ? PlayerColor.Black : PlayerColor.White);
+                this._blackRepresentation.ColorVertice(fieldIdx, moveNumber % 2 == 0 ? PlayerColor.Black : PlayerColor.White);
+            }
 
             this._isFinished = this._redWhiteRepresentation.IsGameFinished() || this._redBlackRepresentation.IsGameFinished();
         }
 
+        public PlayerColor WhoWon()
+        {
+            return this._redWhiteRepresentation.IsGameFinished() ? PlayerColor.White : PlayerColor.Black;
+        }
+
         public (List<int>, PlayerColor) GetWinningPath()
         {
-            var winningColor = this._redWhiteRepresentation.IsGameFinished() ? PlayerColor.White : PlayerColor.Black;
+            var winningColor = this.WhoWon();
 
             List<int> path;
 

@@ -16,7 +16,7 @@ namespace minihex.engine
                 case Algorithm.Heuristic:
                     return new HeuristicEngine(game);
                 case Algorithm.MCTS:
-                    return new RandomEngine(game);
+                    return new MctsEngine(game);
                 default:
                     return new RandomEngine(game);
             }
