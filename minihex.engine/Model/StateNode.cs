@@ -59,7 +59,7 @@ namespace minihex.engine.Model
 
         public StateNode FetchBestMove()
         {
-            if (this.Children.Count == 0)
+            if (this.IsTerminal)
             {
                 return this;
             }
@@ -112,6 +112,7 @@ namespace minihex.engine.Model
                 this.Parent.VisitCount = 0;
                 this.Parent.BackPropagate(!this.ShouldUpdateWin(game.WhoWon()));
                 this.Parent.BackPropagateValue();
+                this.Parent.IsTerminal = true;
                 return;
             }
             else
