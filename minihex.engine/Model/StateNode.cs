@@ -15,11 +15,13 @@ namespace minihex.engine.Model
         public int VisitCount = 0;
         private int _winCount = 0;
 
-        public double WinningRatio => (VisitCount == 0 ? this.Parent.WinningRatio : _winCount / VisitCount);
+        public double WinningRatio => (VisitCount == 0 ? 0.5 * (1 - this.Parent.WinningRatio) : (double)_winCount / VisitCount);
 
         public List<int> moves = new List<int>();
 
         public bool IsTerminal = true;
+
+        public bool GameFinished = false;
 
         public List<StateNode> Children { get; }
 
@@ -75,7 +77,8 @@ namespace minihex.engine.Model
         {
             if (this.IsTerminal) return this;
 
-            return this.Children.OrderByDescending(c => c.DecidingValue).First();
+            return this.Children.Where(c => !c.GameFinished)
+                .OrderByDescending(c => c.DecidingValue).First().Traverse();
         }
 
         // returns random child
@@ -109,10 +112,11 @@ namespace minihex.engine.Model
             {
                 game.MakeMove(avMoves[moveNumber], ++moveNumber + moves.Count, true);
             }
+            this.GameFinished = moveNumber == 0;
 
             var winningColor = game.WhoWon();
-            var shouldUpdateWin = (winningColor == Enums.PlayerColor.White && moves.Count % 2 == 1)
-                || (winningColor == Enums.PlayerColor.Black && moves.Count % 2 == 0);
+            var shouldUpdateWin = (winningColor == Enums.PlayerColor.White && moves.Count % 2 == 0)
+                || (winningColor == Enums.PlayerColor.Black && moves.Count % 2 == 1);
 
             this.BackPropagate(shouldUpdateWin);
             this.BackPropagateValue();
