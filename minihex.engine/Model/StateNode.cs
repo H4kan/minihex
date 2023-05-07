@@ -1,4 +1,5 @@
-﻿using minihex.engine.Randoms;
+﻿using minihex.engine.Model.Enums;
+using minihex.engine.Randoms;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,9 +14,9 @@ namespace minihex.engine.Model
 
         public double DecidingValue = 0.0;
         public int VisitCount = 0;
-        private int _winCount = 0;
+        public int WinCount = 0;
 
-        public double WinningRatio => (VisitCount == 0 ? 0.5 * (1 - this.Parent.WinningRatio) : (double)_winCount / VisitCount);
+        public double WinningRatio => (VisitCount == 0 ? 0.5 * (1 - this.Parent.WinningRatio) : (double)WinCount / VisitCount);
 
         public List<int> moves = new List<int>();
 
@@ -48,7 +49,7 @@ namespace minihex.engine.Model
                 }
                 else
                 {
-                    this.DecidingValue = (double)_winCount / VisitCount
+                    this.DecidingValue = (double)WinCount / VisitCount
                         + Exploration * Math.Sqrt(Math.Log(this.Parent.VisitCount) / VisitCount);
                 }
            
@@ -100,9 +101,23 @@ namespace minihex.engine.Model
 
             var game = new GameExt(size, false);
 
-            for (int i = 0; i < moves.Count; i++)
+            for (int i = 0; i < moves.Count - 1; i++)
             {
                 game.MakeMove(moves[i], i + 1, true);
+            }
+            if (game.IsFinished(moves.Count -1))
+            {
+                this.Parent.GameFinished = true;
+                this.Parent.WinCount = 0;
+                this.Parent.VisitCount = 0;
+                this.Parent.BackPropagate(!this.ShouldUpdateWin(game.WhoWon()));
+                this.Parent.BackPropagateValue();
+                return;
+            }
+            else
+            {
+                game.MakeMove(moves[moves.Count - 1], moves.Count, true);
+                
             }
 
             var avMoves = this.GetAvailableMoves(size).OrderBy(x => RandomSource.rand.Next()).ToList();
@@ -115,17 +130,22 @@ namespace minihex.engine.Model
             this.GameFinished = moveNumber == 0;
 
             var winningColor = game.WhoWon();
-            var shouldUpdateWin = (winningColor == Enums.PlayerColor.White && moves.Count % 2 == 0)
-                || (winningColor == Enums.PlayerColor.Black && moves.Count % 2 == 1);
+            var shouldUpdateWin = this.ShouldUpdateWin(winningColor);
 
             this.BackPropagate(shouldUpdateWin);
             this.BackPropagateValue();
         }
 
+        private bool ShouldUpdateWin(PlayerColor color)
+        {
+            return (color == Enums.PlayerColor.White && moves.Count % 2 == 0)
+                || (color == Enums.PlayerColor.Black && moves.Count % 2 == 1);
+        }
+
         public void BackPropagate(bool shouldUpdateWin)
         {
             this.VisitCount++;
-            if (shouldUpdateWin) this._winCount++;
+            if (shouldUpdateWin) this.WinCount++;
             if (this.Parent != null)
             {
                 this.Parent.BackPropagate(!shouldUpdateWin);
