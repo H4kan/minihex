@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using minihex.Web.Models.Requests;
-using minihex.Web.Models.Responses;
-using minihex.Web.Models.Enums;
-using minihex.Web.Models;
 using minihex.engine.Engine;
 using minihex.engine.Model.Requests;
+using minihex.Web.Models.Enums;
+using minihex.Web.Models.Requests;
+using minihex.Web.Models.Responses;
 
 namespace Project1.Controllers
 {
@@ -12,15 +11,13 @@ namespace Project1.Controllers
     [Route("[controller]")]
     public class GameController : ControllerBase
     {
-        
-        private EngineOrchestrator _engineOrchestrator = EngineOrchestrator.instance;
+        private readonly EngineOrchestrator _engineOrchestrator = EngineOrchestrator.Instance;
 
         // returns new, non-repeatable gameId
         [HttpPost("beginGame")]
-        public GameIdentificator BeginGame(BeginGameRequest request)
+        public GameIdentificatorResponse BeginGame(BeginGameRequest request)
         {
-
-            this._engineOrchestrator.SetupEngines(new SetupEngineRequest()
+            _engineOrchestrator.SetupEngines(new SetupEngineRequest()
             {
                 Engine1 = request.Player1Variant,
                 Engine2 = request.Player2Variant,
@@ -28,21 +25,21 @@ namespace Project1.Controllers
                 Size = request.Size,
             });
 
-            return new GameIdentificator()
+            return new GameIdentificatorResponse()
             {
-                GameId = this._engineOrchestrator.GameId,
+                GameId = _engineOrchestrator.GameId,
             };
         }
 
         [HttpPost("getMove")]
         public MoveInfoResponse GetMove(GetMoveRequest request)
         {
-            this._engineOrchestrator.WaitTillReady(request.MoveNumber);
+            _engineOrchestrator.WaitTillReady(request.MoveNumber);
 
             return new MoveInfoResponse()
             {
-                FieldIdx = this._engineOrchestrator.Game.GetMove(request.MoveNumber),
-                Status = this._engineOrchestrator.Game.IsFinished(request.MoveNumber) ? GameStatus.Finished : GameStatus.InProgress,
+                FieldIdx = _engineOrchestrator.Game.GetMove(request.MoveNumber),
+                Status = _engineOrchestrator.Game.IsFinished(request.MoveNumber) ? GameStatus.Finished : GameStatus.InProgress,
                 GameId = request.GameId
             };
         }
@@ -50,21 +47,21 @@ namespace Project1.Controllers
         [HttpPost("makeMove")]
         public MoveInfoResponse MakeMove(MakeMoveRequest request)
         {
-            this._engineOrchestrator.Game.MakeMove(request.FieldIdx, request.MoveNumber);
-            this._engineOrchestrator.SetReady(request.MoveNumber);
+            _engineOrchestrator.Game.MakeMove(request.FieldIdx, request.MoveNumber);
+            _engineOrchestrator.SetReady(request.MoveNumber);
 
             return new MoveInfoResponse()
             {
                 FieldIdx = request.FieldIdx,
-                Status = this._engineOrchestrator.Game.IsFinished(request.MoveNumber) ? GameStatus.Finished : GameStatus.InProgress,
+                Status = _engineOrchestrator.Game.IsFinished(request.MoveNumber) ? GameStatus.Finished : GameStatus.InProgress,
                 GameId = request.GameId
             };
         }
 
         [HttpPost("getWinningPath")]
-        public GetWinnigPathResponse GetWinningPath(GameIdentificator request)
+        public GetWinnigPathResponse GetWinningPath(GameIdentificatorResponse request)
         {
-            var winningPath = this._engineOrchestrator.Game.GetWinningPath();
+            var winningPath = _engineOrchestrator.Game.GetWinningPath();
             return new GetWinnigPathResponse()
             {
                 GameId = request.GameId,

@@ -10,5 +10,4 @@ namespace minihex.Web.Models.Responses
 
         public IEnumerable<int>? Path { get; set; }
     }
-
 }

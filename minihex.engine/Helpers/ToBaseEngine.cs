@@ -1,25 +1,20 @@
 ﻿using minihex.engine.Engine.Engines;
 using minihex.engine.Model;
 using minihex.engine.Models.Enums;
-using System.Security.Cryptography;
 
 namespace minihex.engine
 {
     public static partial class Helpers
     {
-        public static BaseEngine ToBaseEngine(Algorithm algorithm, GameExt game)
+        public static BaseEngine? ToBaseEngine(Algorithm algorithm, GameExt game)
         {
-            switch (algorithm)
+            return algorithm switch
             {
-                case Algorithm.Human:
-                    return null;
-                case Algorithm.Heuristic:
-                    return new HeuristicEngine(game);
-                case Algorithm.MCTS:
-                    return new MctsEngine(game);
-                default:
-                    return new RandomEngine(game);
-            }
+                Algorithm.Human => null,
+                Algorithm.Heuristic => new HeuristicEngine(game),
+                Algorithm.MCTS => new MctsEngine(game),
+                _ => new RandomEngine(game),
+            };
         }
     }
 }

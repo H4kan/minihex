@@ -4,55 +4,53 @@ namespace minihex.engine.Model
 {
     public class GameExt : Game
     {
-
         private bool _isFinished = false;
 
         public GraphRepresentation _redWhiteRepresentation;
         public GraphRepresentation _redBlackRepresentation;
 
-        private GraphRepresentation _whiteRepresentation;
-        private GraphRepresentation _blackRepresentation;
+        private readonly GraphRepresentation _whiteRepresentation;
+        private readonly GraphRepresentation _blackRepresentation;
 
-        public GameExt(int size, bool swap): base(size, swap) {
-            this._redWhiteRepresentation = new GraphRepresentation(size, PlayerColor.White);
-            this._redBlackRepresentation = new GraphRepresentation(size, PlayerColor.Black);
+        public GameExt(int size, bool swap) : base(size, swap)
+        {
+            _redWhiteRepresentation = new GraphRepresentation(size, PlayerColor.White);
+            _redBlackRepresentation = new GraphRepresentation(size, PlayerColor.Black);
 
-            this._whiteRepresentation = new GraphRepresentation(size, PlayerColor.White);
-            this._blackRepresentation = new GraphRepresentation(size, PlayerColor.Black);
+            _whiteRepresentation = new GraphRepresentation(size, PlayerColor.White);
+            _blackRepresentation = new GraphRepresentation(size, PlayerColor.Black);
         }
-
 
         public bool IsFinished(int moveNumber)
         {
-            return _isFinished && base._moves.Count == moveNumber;
+            return _isFinished && _moves.Count == moveNumber;
         }
-
 
         public override void MakeMove(int fieldIdx, int moveNumber, bool optimizeForEngine = false)
         {
             base.MakeMove(fieldIdx, moveNumber);
+            var color = moveNumber % 2 == 0 ? PlayerColor.Black : PlayerColor.White;
 
-            this._redWhiteRepresentation.ColorVerticeAndReduce(fieldIdx, moveNumber % 2 == 0 ? PlayerColor.Black : PlayerColor.White);
-            this._redBlackRepresentation.ColorVerticeAndReduce(fieldIdx, moveNumber % 2 == 0 ? PlayerColor.Black : PlayerColor.White);
+            _redWhiteRepresentation.ColorVerticeAndReduce(fieldIdx, color);
+            _redBlackRepresentation.ColorVerticeAndReduce(fieldIdx, color);
 
-            if (!optimizeForEngine )
+            if (!optimizeForEngine)
             {
-                this._whiteRepresentation.ColorVertice(fieldIdx, moveNumber % 2 == 0 ? PlayerColor.Black : PlayerColor.White);
-                this._blackRepresentation.ColorVertice(fieldIdx, moveNumber % 2 == 0 ? PlayerColor.Black : PlayerColor.White);
+                _whiteRepresentation.ColorVertice(fieldIdx, color);
+                _blackRepresentation.ColorVertice(fieldIdx, color);
             }
 
-            this._isFinished = this._redWhiteRepresentation.IsGameFinished() || this._redBlackRepresentation.IsGameFinished();
+            _isFinished = _redWhiteRepresentation.IsGameFinished() || _redBlackRepresentation.IsGameFinished();
         }
 
         public PlayerColor WhoWon()
         {
-            return this._redWhiteRepresentation.IsGameFinished() ? PlayerColor.White : PlayerColor.Black;
+            return _redWhiteRepresentation.IsGameFinished() ? PlayerColor.White : PlayerColor.Black;
         }
 
         public (List<int>, PlayerColor) GetWinningPath()
         {
-            var winningColor = this.WhoWon();
-
+            var winningColor = WhoWon();
             List<int> path;
 
             if (winningColor == PlayerColor.White)

@@ -15,8 +15,4 @@ namespace minihex.Web.Models.Requests
 
         public int Delay { get; set; }
     }
-
-
-
-    
 }

@@ -6,5 +6,4 @@
 
         public int MoveNumber { get; set; }
     }
-
 }
