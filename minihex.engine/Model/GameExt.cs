@@ -23,7 +23,7 @@ namespace minihex.engine.Model
 
         public bool IsFinished(int moveNumber)
         {
-            return _isFinished && _moves.Count == moveNumber;
+            return _isFinished && _moves.Count <= moveNumber;
         }
 
         public override void MakeMove(int fieldIdx, int moveNumber, bool optimizeForEngine = false)

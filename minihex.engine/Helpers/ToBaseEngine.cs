@@ -6,13 +6,13 @@ namespace minihex.engine
 {
     public static partial class Helpers
     {
-        public static BaseEngine? ToBaseEngine(Algorithm algorithm, GameExt game)
+        public static BaseEngine? ToBaseEngine(Algorithm algorithm, GameExt game, CancellationToken cancellationToken)
         {
             return algorithm switch
             {
                 Algorithm.Human => null,
                 Algorithm.Heuristic => new HeuristicEngine(game),
-                Algorithm.MCTS => new MctsEngine(game),
+                Algorithm.MCTS => new MctsEngine(game, cancellationToken),
                 _ => new RandomEngine(game),
             };
         }

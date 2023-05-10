@@ -24,6 +24,7 @@ namespace minihex.engine.Engine
 
         public void SetupEngines(SetupEngineRequest request)
         {
+            #region Cancel old engine runs
             if (_currentTask != null)
             {
                 _engineProcessTokenSource?.Cancel();
@@ -31,13 +32,22 @@ namespace minihex.engine.Engine
                 {
                     _currentTask.Wait();
                 }
-                catch (TaskCanceledException) { }
+                catch (TaskCanceledException) {}
+                catch (Exception ex)
+                {
+                    if (!(ex.InnerException is TaskCanceledException))
+                    {
+                        throw;
+                    }
+                }
                 finally 
                 { 
                     _engineProcessTokenSource?.Dispose();
                 }
-
             }
+            #endregion
+
+            _moveNumber = 0;
  
             _readyList = Enumerable.Range(0, request.Size * request.Size)
                 .Select(i => false).ToList();
@@ -45,8 +55,10 @@ namespace minihex.engine.Engine
             Game = new GameExt(request.Size, request.Swap);
             GameId = Guid.NewGuid();
 
-            _engine1 = Helpers.ToBaseEngine(request.Engine1, Game);
-            _engine2 = Helpers.ToBaseEngine(request.Engine2, Game);
+            _engineProcessTokenSource = new CancellationTokenSource();
+
+            _engine1 = Helpers.ToBaseEngine(request.Engine1, Game, _engineProcessTokenSource.Token);
+            _engine2 = Helpers.ToBaseEngine(request.Engine2, Game, _engineProcessTokenSource.Token);
 
             if (_engine1 != null && _engine2 != null)
             {
@@ -65,13 +77,12 @@ namespace minihex.engine.Engine
 
         public void StartBothEngineProcessing()
         {
-            _engineProcessTokenSource = new CancellationTokenSource();
             _currentTask = Task.Run(() =>
             {
                 while (!Game.IsFinished(_moveNumber))
                 {
                     _engine1!.Process(++_moveNumber);
-                    _engineProcessTokenSource.Token.ThrowIfCancellationRequested();
+                    _engineProcessTokenSource!.Token.ThrowIfCancellationRequested();
                     SetReady(_moveNumber);
                     if (!Game.IsFinished(_moveNumber))
                     {
@@ -80,31 +91,29 @@ namespace minihex.engine.Engine
                         SetReady(_moveNumber);
                     }
                 }
-            }, _engineProcessTokenSource.Token);
+            }, _engineProcessTokenSource!.Token);
         }
 
         public void StartEngine1Processing()
         {
-            _engineProcessTokenSource = new CancellationTokenSource();
             _currentTask = Task.Run(() =>
             {
                 while (!Game.IsFinished(_moveNumber))
                 {
                     _engine1!.Process(++_moveNumber);
                     SetReady(_moveNumber);
-                    _engineProcessTokenSource.Token.ThrowIfCancellationRequested();
+                    _engineProcessTokenSource!.Token.ThrowIfCancellationRequested();
 
                     if (!Game.IsFinished(_moveNumber))
                     {
                         WaitTillReady(++_moveNumber, true);
                     }
                 }
-            }, _engineProcessTokenSource.Token);
+            }, _engineProcessTokenSource!.Token);
         }
 
         public void StartEngine2Processing()
         {
-            _engineProcessTokenSource = new CancellationTokenSource();
             _currentTask = Task.Run(() =>
             {
                 while (!Game.IsFinished(_moveNumber))
@@ -114,10 +123,10 @@ namespace minihex.engine.Engine
                     {
                         _engine2!.Process(++_moveNumber);
                         SetReady(_moveNumber);
-                        _engineProcessTokenSource.Token.ThrowIfCancellationRequested();
+                        _engineProcessTokenSource!.Token.ThrowIfCancellationRequested();
                     }
                 }
-            }, _engineProcessTokenSource.Token);
+            }, _engineProcessTokenSource!.Token);
         }
 
         public void WaitTillReady(int moveNumber, bool engineSide = false)
