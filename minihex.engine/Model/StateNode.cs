@@ -56,7 +56,7 @@ namespace minihex.engine.Model
             }
             else
             {
-                return this.Children.OrderByDescending(c => c.FetchBestMove().WinningRatio).First();
+                return this.Children.OrderByDescending(c => c.WinningRatio).ToList().First();
             }
         }
 
@@ -101,7 +101,7 @@ namespace minihex.engine.Model
                 this.Parent!.GameFinished = true;
                 this.Parent.WinCount = 0;
                 this.Parent.VisitCount = 0;
-                this.Parent.BackPropagate(!this.ShouldUpdateWin(game.WhoWon()));
+                this.Parent.BackPropagate(!ShouldUpdateWin(game.WhoWon()));
                 this.Parent.BackPropagateValue();
                 this.Parent.IsTerminal = true;
                 return;
@@ -121,7 +121,7 @@ namespace minihex.engine.Model
             this.GameFinished = moveNumber == 0;
 
             var winningColor = game.WhoWon();
-            var shouldUpdateWin = this.ShouldUpdateWin(winningColor);
+            var shouldUpdateWin = ShouldUpdateWin(winningColor);
 
             BackPropagate(shouldUpdateWin);
             BackPropagateValue();
@@ -129,8 +129,8 @@ namespace minihex.engine.Model
 
         private bool ShouldUpdateWin(PlayerColor color)
         {
-            return (color == Enums.PlayerColor.White && moves.Count % 2 == 0)
-                || (color == Enums.PlayerColor.Black && moves.Count % 2 == 1);
+            return (color == Enums.PlayerColor.White && moves.Count % 2 == 1)
+                || (color == Enums.PlayerColor.Black && moves.Count % 2 == 0);
         }
 
         public void BackPropagate(bool shouldUpdateWin)
