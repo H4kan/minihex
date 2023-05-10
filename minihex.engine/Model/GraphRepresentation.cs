@@ -22,14 +22,14 @@ namespace minihex.engine.Model
 
         private int Size { get; set; }
 
-        private PlayerColor TargerColor { get; set; }
+        private PlayerColor TargetColor { get; set; }
         private byte TargetMask { get; set; }
         private byte LeftMask { get; set; }
         private byte RightMask { get; set; }
 
         private List<int>? WinningPath { get; set; }
 
-        public GraphRepresentation(int size, PlayerColor targerColor)
+        public GraphRepresentation(int size, PlayerColor targetColor)
         {
             this.Edges = new byte[size * size, size * size];
             this.DeadVertice = new bool[size * size];
@@ -38,9 +38,9 @@ namespace minihex.engine.Model
             this.Size = size;
 
             this.SetupEmptyBoard();
-            TargerColor = targerColor;
+            TargetColor = targetColor;
 
-            if (this.TargerColor == PlayerColor.White)
+            if (this.TargetColor == PlayerColor.White)
             {
                 TargetMask |= 0b0011;
                 LeftMask |= 0b0001;
@@ -113,7 +113,7 @@ namespace minihex.engine.Model
         public void ColorVertice(int i, PlayerColor color)
         {
             this.Vertices[i] = color;
-            if (color != TargerColor)
+            if (color != TargetColor)
             {
                 this.KillVertice(i);
             }
@@ -127,7 +127,7 @@ namespace minihex.engine.Model
 
             // isolate diff color vertice and kill it
 
-            if (color == TargerColor)
+            if (color == TargetColor)
             {
                 // iterate over neighbours of i
                 for (int j = 0; j < Size * Size; j++)
@@ -351,7 +351,7 @@ namespace minihex.engine.Model
 
         public GraphRepresentation CopyOut()
         {
-            var gr = new GraphRepresentation(this.Size, this.TargerColor);
+            var gr = new GraphRepresentation(this.Size, this.TargetColor);
 
             gr.CopyIn(this.Edges, this.Vertices, this.SideVertices, this.DeadVertice);
 

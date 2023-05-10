@@ -16,6 +16,7 @@ namespace minihex.engine.Engine
         private BaseEngine? _engine2;
         private int _moveNumber;
         private CancellationTokenSource? _engineProcessTokenSource;
+        private Task? _currentTask;
 
         private static readonly EngineOrchestrator _instance = new();
 
@@ -23,7 +24,21 @@ namespace minihex.engine.Engine
 
         public void SetupEngines(SetupEngineRequest request)
         {
-            _engineProcessTokenSource?.Cancel();
+            if (_currentTask != null)
+            {
+                _engineProcessTokenSource?.Cancel();
+                try
+                {
+                    _currentTask.Wait();
+                }
+                catch (TaskCanceledException) { }
+                finally 
+                { 
+                    _engineProcessTokenSource?.Dispose();
+                }
+
+            }
+ 
             _readyList = Enumerable.Range(0, request.Size * request.Size)
                 .Select(i => false).ToList();
 
@@ -51,18 +66,18 @@ namespace minihex.engine.Engine
         public void StartBothEngineProcessing()
         {
             _engineProcessTokenSource = new CancellationTokenSource();
-            Task.Run(() =>
+            _currentTask = Task.Run(() =>
             {
                 while (!Game.IsFinished(_moveNumber))
                 {
                     _engine1!.Process(++_moveNumber);
-                    SetReady(_moveNumber);
                     _engineProcessTokenSource.Token.ThrowIfCancellationRequested();
+                    SetReady(_moveNumber);
                     if (!Game.IsFinished(_moveNumber))
                     {
                         _engine2!.Process(++_moveNumber);
-                        SetReady(_moveNumber);
                         _engineProcessTokenSource.Token.ThrowIfCancellationRequested();
+                        SetReady(_moveNumber);
                     }
                 }
             }, _engineProcessTokenSource.Token);
@@ -71,7 +86,7 @@ namespace minihex.engine.Engine
         public void StartEngine1Processing()
         {
             _engineProcessTokenSource = new CancellationTokenSource();
-            Task.Run(() =>
+            _currentTask = Task.Run(() =>
             {
                 while (!Game.IsFinished(_moveNumber))
                 {
@@ -90,7 +105,7 @@ namespace minihex.engine.Engine
         public void StartEngine2Processing()
         {
             _engineProcessTokenSource = new CancellationTokenSource();
-            Task.Run(() =>
+            _currentTask = Task.Run(() =>
             {
                 while (!Game.IsFinished(_moveNumber))
                 {
