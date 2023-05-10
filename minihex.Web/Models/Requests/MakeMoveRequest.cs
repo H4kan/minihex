@@ -8,5 +8,4 @@
 
         public int FieldIdx { get; set; }
     }
-
 }

@@ -1,34 +1,27 @@
 ﻿using minihex.engine.Model.Enums;
 using minihex.engine.Randoms;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace minihex.engine.Model
 {
     public class StateNode
     {
-        public static double Exploration = Math.Sqrt(2);
+        private static readonly double Exploration = Math.Sqrt(2);
 
         public double DecidingValue = 0.0;
         public int VisitCount = 0;
         public int WinCount = 0;
 
-        public double WinningRatio => (VisitCount == 0 ? 0.5 * (1 - this.Parent.WinningRatio) : (double)WinCount / VisitCount);
+        public double WinningRatio => (VisitCount == 0 && this.Parent is not null ? 0.5 * (1 - this.Parent.WinningRatio) : (double)WinCount / VisitCount);
 
-        public List<int> moves = new List<int>();
-
+        public List<int> moves = new();
         public bool IsTerminal = true;
-
         public bool GameFinished = false;
 
         public List<StateNode> Children { get; }
-
         public StateNode? Parent { get; set; }
 
-        public StateNode(int nextMove, StateNode? parent = null) {
+        public StateNode(int nextMove, StateNode? parent = null)
+        {
             this.Children = new List<StateNode>();
             this.Parent = parent;
             if (this.Parent != null)
@@ -52,10 +45,8 @@ namespace minihex.engine.Model
                     this.DecidingValue = (double)WinCount / VisitCount
                         + Exploration * Math.Sqrt(Math.Log(this.Parent.VisitCount) / VisitCount);
                 }
-           
-            }  
+            }
         }
-
 
         public StateNode FetchBestMove()
         {
@@ -65,7 +56,7 @@ namespace minihex.engine.Model
             }
             else
             {
-                return this.Children.OrderByDescending(c => c.FetchBestMove().WinningRatio).First();
+                return this.Children.OrderByDescending(c => c.WinningRatio).ToList().First();
             }
         }
 
@@ -86,42 +77,41 @@ namespace minihex.engine.Model
         public StateNode Expand(int size)
         {
             this.IsTerminal = false;
-            var avMoves = this.GetAvailableMoves(size);
+            var avMoves = GetAvailableMoves(size);
+
             for (int i = 0; i < avMoves.Count; i++)
             {
                 this.Children.Add(new StateNode(avMoves[i], this));
             }
 
-            var childIdx = RandomSource.rand.Next(0, this.Children.Count);
+            var childIdx = RandomSource.Rand.Next(0, this.Children.Count);
             return this.Children[childIdx];
         }
 
         public void Playout(int size)
         {
-
             var game = new GameExt(size, false);
 
             for (int i = 0; i < moves.Count - 1; i++)
             {
                 game.MakeMove(moves[i], i + 1, true);
             }
-            if (game.IsFinished(moves.Count -1))
+            if (game.IsFinished(moves.Count - 1))
             {
-                this.Parent.GameFinished = true;
+                this.Parent!.GameFinished = true;
                 this.Parent.WinCount = 0;
                 this.Parent.VisitCount = 0;
-                this.Parent.BackPropagate(!this.ShouldUpdateWin(game.WhoWon()));
+                this.Parent.BackPropagate(!ShouldUpdateWin(game.WhoWon()));
                 this.Parent.BackPropagateValue();
                 this.Parent.IsTerminal = true;
                 return;
             }
             else
             {
-                game.MakeMove(moves[moves.Count - 1], moves.Count, true);
-                
+                game.MakeMove(moves[^1], moves.Count, true);
             }
 
-            var avMoves = this.GetAvailableMoves(size).OrderBy(x => RandomSource.rand.Next()).ToList();
+            var avMoves = GetAvailableMoves(size).OrderBy(x => RandomSource.Rand.Next()).ToList();
 
             int moveNumber = 0;
             while (!game.IsFinished(moveNumber + moves.Count))
@@ -131,35 +121,29 @@ namespace minihex.engine.Model
             this.GameFinished = moveNumber == 0;
 
             var winningColor = game.WhoWon();
-            var shouldUpdateWin = this.ShouldUpdateWin(winningColor);
+            var shouldUpdateWin = ShouldUpdateWin(winningColor);
 
-            this.BackPropagate(shouldUpdateWin);
-            this.BackPropagateValue();
+            BackPropagate(shouldUpdateWin);
+            BackPropagateValue();
         }
 
         private bool ShouldUpdateWin(PlayerColor color)
         {
-            return (color == Enums.PlayerColor.White && moves.Count % 2 == 0)
-                || (color == Enums.PlayerColor.Black && moves.Count % 2 == 1);
+            return (color == Enums.PlayerColor.White && moves.Count % 2 == 1)
+                || (color == Enums.PlayerColor.Black && moves.Count % 2 == 0);
         }
 
         public void BackPropagate(bool shouldUpdateWin)
         {
             this.VisitCount++;
             if (shouldUpdateWin) this.WinCount++;
-            if (this.Parent != null)
-            {
-                this.Parent.BackPropagate(!shouldUpdateWin);
-            }
+            this.Parent?.BackPropagate(!shouldUpdateWin);
         }
 
         public void BackPropagateValue()
         {
-            this.UpdateDecidingValue();
-            if (this.Parent != null)
-            {
-                this.Parent.BackPropagateValue();
-            }
+            UpdateDecidingValue();
+            Parent?.BackPropagateValue();
         }
 
         private List<int> GetAvailableMoves(int size)

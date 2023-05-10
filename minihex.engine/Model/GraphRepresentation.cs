@@ -1,13 +1,12 @@
 ﻿using minihex.engine.Model.Enums;
 using QuikGraph;
 using QuikGraph.Algorithms;
-using System;
 
 namespace minihex.engine.Model
 {
     public class GraphRepresentation
     {
-        private byte[,] Edges { get; set; } 
+        private byte[,] Edges { get; set; }
 
         private PlayerColor[] Vertices { get; set; }
 
@@ -23,14 +22,14 @@ namespace minihex.engine.Model
 
         private int Size { get; set; }
 
-        private PlayerColor TargerColor { get; set; }
+        private PlayerColor TargetColor { get; set; }
         private byte TargetMask { get; set; }
         private byte LeftMask { get; set; }
         private byte RightMask { get; set; }
 
         private List<int>? WinningPath { get; set; }
 
-        public GraphRepresentation(int size, PlayerColor targerColor)
+        public GraphRepresentation(int size, PlayerColor targetColor)
         {
             this.Edges = new byte[size * size, size * size];
             this.DeadVertice = new bool[size * size];
@@ -39,9 +38,9 @@ namespace minihex.engine.Model
             this.Size = size;
 
             this.SetupEmptyBoard();
-            TargerColor = targerColor;
+            TargetColor = targetColor;
 
-            if (this.TargerColor == PlayerColor.White)
+            if (this.TargetColor == PlayerColor.White)
             {
                 TargetMask |= 0b0011;
                 LeftMask |= 0b0001;
@@ -58,7 +57,7 @@ namespace minihex.engine.Model
 
         private void AddEdge(int i, int j)
         {
-            this.Edges[i,j] = 1;
+            this.Edges[i, j] = 1;
             this.Edges[j, i] = 1;
         }
 
@@ -73,10 +72,12 @@ namespace minihex.engine.Model
         {
             for (int i = 0; i < Size * Size; i++)
             {
-                if (i >= Size) {
+                if (i >= Size)
+                {
                     this.AddEdge(i, i - Size);
                 }
-                if (i % Size > 0) {
+                if (i % Size > 0)
+                {
                     this.AddEdge(i, i - 1);
 
                     if (i / Size < Size - 1)
@@ -91,7 +92,7 @@ namespace minihex.engine.Model
                     this.SideVertices[i] |= 0b0001;
                 }
                 // right side
-                else if (i % Size == Size -1)
+                else if (i % Size == Size - 1)
                 {
                     this.SideVertices[i] |= 0b0010;
                 }
@@ -112,7 +113,7 @@ namespace minihex.engine.Model
         public void ColorVertice(int i, PlayerColor color)
         {
             this.Vertices[i] = color;
-            if (color != TargerColor)
+            if (color != TargetColor)
             {
                 this.KillVertice(i);
             }
@@ -121,12 +122,12 @@ namespace minihex.engine.Model
 
         // move all edges from neighbouring colored to new colored and "delete" all colored neighbours
         public void ColorVerticeAndReduce(int i, PlayerColor color)
-        { 
+        {
             this.ColorVertice(i, color);
-            
+
             // isolate diff color vertice and kill it
-           
-            if (color == TargerColor)
+
+            if (color == TargetColor)
             {
                 // iterate over neighbours of i
                 for (int j = 0; j < Size * Size; j++)
@@ -143,7 +144,6 @@ namespace minihex.engine.Model
                         }
                         this.SideVertices[i] |= this.SideVertices[j];
                         this.DeadVertice[j] = true;
-
                     }
                 }
             }
@@ -189,16 +189,12 @@ namespace minihex.engine.Model
             }
 
             var g = this.MakeWeightedGraph();
-
             var lr = this.GetLRUndead();
 
-            IEnumerable<Edge<int>>? path = null;
-
-            
             var func = g.ShortestPathsDijkstra(wFunc, lr.Item1);
-             
-            func(lr.Item2, out path);
-            
+
+            func(lr.Item2, out IEnumerable<Edge<int>>? path);
+
             if (path == null)
             {
                 throw new Exception("Path not found");
@@ -290,7 +286,7 @@ namespace minihex.engine.Model
 
         private byte GetWeight(int i, int j)
         {
-            byte result = 0;
+            byte result;
             if (this.Vertices[i] == PlayerColor.None
                 && this.Vertices[j] == PlayerColor.None)
                 result = 2;
@@ -338,7 +334,7 @@ namespace minihex.engine.Model
             this.DeadVertice[vertIdx] = true;
         }
 
-        public void CopyIn(byte [,] edges, PlayerColor[] vertices, byte[] sideVertices, bool[] deadVertice)
+        public void CopyIn(byte[,] edges, PlayerColor[] vertices, byte[] sideVertices, bool[] deadVertice)
         {
             for (int i = 0; i < Size * Size; i++)
             {
@@ -355,13 +351,11 @@ namespace minihex.engine.Model
 
         public GraphRepresentation CopyOut()
         {
-            var gr = new GraphRepresentation(this.Size, this.TargerColor);
+            var gr = new GraphRepresentation(this.Size, this.TargetColor);
 
             gr.CopyIn(this.Edges, this.Vertices, this.SideVertices, this.DeadVertice);
 
             return gr;
-
         }
-
     }
 }

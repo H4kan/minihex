@@ -5,122 +5,128 @@ using minihex.engine.Randoms;
 
 namespace minihex.engine.Engine
 {
-    public class EngineOrchestrator 
+    public class EngineOrchestrator
     {
-        public static readonly EngineOrchestrator instance = new EngineOrchestrator();
-
-        public GameExt Game { get; set; }
-
-        
-        private List<bool> _readyList;
-
-        private BaseEngine Engine1 { get; set; }
-        private BaseEngine Engine2 { get; set; }
-
-        private int _moveNumber {  get; set; }
-
-        private CancellationTokenSource engineProcessTokenSource { get; set; }
-
+        public GameExt Game { get; set; } = new GameExt(0, false);
         public Guid GameId { get; set; }
+        public static EngineOrchestrator Instance => _instance;
 
-        private EngineOrchestrator() {
-            RandomSource.SetSeed(0);
+        private List<bool> _readyList = Enumerable.Empty<bool>().ToList();
+        private BaseEngine? _engine1;
+        private BaseEngine? _engine2;
+        private int _moveNumber;
+        private CancellationTokenSource? _engineProcessTokenSource;
+        private Task? _currentTask;
 
-        }
+        private static readonly EngineOrchestrator _instance = new();
+
+        private EngineOrchestrator() => RandomSource.SetSeed(0);
 
         public void SetupEngines(SetupEngineRequest request)
         {
-            if (this.engineProcessTokenSource != null)
+            #region Cancel old engine runs
+            if (_currentTask != null)
             {
-                this.engineProcessTokenSource.Cancel();
+                _engineProcessTokenSource?.Cancel();
+                try
+                {
+                    _currentTask.Wait();
+                }
+                catch (TaskCanceledException) {}
+                catch (Exception ex)
+                {
+                    if (!(ex.InnerException is TaskCanceledException))
+                    {
+                        throw;
+                    }
+                }
+                finally 
+                { 
+                    _engineProcessTokenSource?.Dispose();
+                }
             }
+            #endregion
 
-            this.Game = new GameExt(request.Size, request.Swap);
+            _moveNumber = 0;
+ 
+            _readyList = Enumerable.Range(0, request.Size * request.Size)
+                .Select(i => false).ToList();
 
-            this._readyList = Enumerable
-                .Range(0, request.Size * request.Size).Select(i => false).ToList();
+            Game = new GameExt(request.Size, request.Swap);
+            GameId = Guid.NewGuid();
 
-            this._moveNumber = 0;
+            _engineProcessTokenSource = new CancellationTokenSource();
 
-            this.GameId = Guid.NewGuid();
+            _engine1 = Helpers.ToBaseEngine(request.Engine1, Game, _engineProcessTokenSource.Token);
+            _engine2 = Helpers.ToBaseEngine(request.Engine2, Game, _engineProcessTokenSource.Token);
 
-            this.Engine1 = Helpers.ToBaseEngine(request.Engine1, Game);
-            this.Engine2 = Helpers.ToBaseEngine(request.Engine2, Game);
-
-
-            if (this.Engine1 != null && this.Engine2 != null)
+            if (_engine1 != null && _engine2 != null)
             {
-                this.StartBothEngineProcessing();
+                StartBothEngineProcessing();
             }
-            else if (this.Engine1 != null)
+            else if (_engine1 != null)
             {
-                this.StartEngine1Processing();
+                StartEngine1Processing();
             }
             else
             {
-                this.StartEngine2Processing();
+                StartEngine2Processing();
             }
         }
 
 
         public void StartBothEngineProcessing()
         {
-            engineProcessTokenSource = new CancellationTokenSource();
-            Task.Run(() =>
+            _currentTask = Task.Run(() =>
             {
                 while (!Game.IsFinished(_moveNumber))
                 {
-                    this.Engine1.Process(++_moveNumber);
-                    this.SetReady(_moveNumber);
-                    this.engineProcessTokenSource.Token.ThrowIfCancellationRequested();
+                    _engine1!.Process(++_moveNumber);
+                    _engineProcessTokenSource!.Token.ThrowIfCancellationRequested();
+                    SetReady(_moveNumber);
                     if (!Game.IsFinished(_moveNumber))
                     {
-                        this.Engine2.Process(++_moveNumber);
-                        this.SetReady(_moveNumber);
-                        this.engineProcessTokenSource.Token.ThrowIfCancellationRequested();
+                        _engine2!.Process(++_moveNumber);
+                        _engineProcessTokenSource.Token.ThrowIfCancellationRequested();
+                        SetReady(_moveNumber);
                     }
                 }
-            }, engineProcessTokenSource.Token);
+            }, _engineProcessTokenSource!.Token);
         }
 
         public void StartEngine1Processing()
         {
-            engineProcessTokenSource = new CancellationTokenSource();
-            Task.Run(() =>
+            _currentTask = Task.Run(() =>
             {
                 while (!Game.IsFinished(_moveNumber))
                 {
-         
-                    this.Engine1.Process(++_moveNumber);
-                    this.SetReady(_moveNumber);
-                    this.engineProcessTokenSource.Token.ThrowIfCancellationRequested();
-                  
+                    _engine1!.Process(++_moveNumber);
+                    SetReady(_moveNumber);
+                    _engineProcessTokenSource!.Token.ThrowIfCancellationRequested();
+
                     if (!Game.IsFinished(_moveNumber))
                     {
-                        this.WaitTillReady(++_moveNumber, true);
+                        WaitTillReady(++_moveNumber, true);
                     }
                 }
-            }, engineProcessTokenSource.Token);
+            }, _engineProcessTokenSource!.Token);
         }
 
         public void StartEngine2Processing()
         {
-            engineProcessTokenSource = new CancellationTokenSource();
-            Task.Run(() =>
+            _currentTask = Task.Run(() =>
             {
                 while (!Game.IsFinished(_moveNumber))
                 {
-                    this.WaitTillReady(++_moveNumber, true);
-
+                    WaitTillReady(++_moveNumber, true);
                     if (!Game.IsFinished(_moveNumber))
                     {
-                        this.Engine2.Process(++_moveNumber);
-                        this.SetReady(_moveNumber);
-                        this.engineProcessTokenSource.Token.ThrowIfCancellationRequested();
-
+                        _engine2!.Process(++_moveNumber);
+                        SetReady(_moveNumber);
+                        _engineProcessTokenSource!.Token.ThrowIfCancellationRequested();
                     }
                 }
-            }, engineProcessTokenSource.Token);
+            }, _engineProcessTokenSource!.Token);
         }
 
         public void WaitTillReady(int moveNumber, bool engineSide = false)
@@ -128,13 +134,13 @@ namespace minihex.engine.Engine
             while (!IsReady(moveNumber))
             {
                 Thread.Sleep(300);
-                if (engineSide) this.engineProcessTokenSource.Token.ThrowIfCancellationRequested();
+                if (engineSide) _engineProcessTokenSource?.Token.ThrowIfCancellationRequested();
             }
         }
 
         private bool IsReady(int moveNumber)
         {
-            return this._readyList[moveNumber - 1];
+            return _readyList[moveNumber - 1];
         }
 
         public void SetReady(int moveNumber)
