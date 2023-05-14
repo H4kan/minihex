@@ -1,8 +1,7 @@
 ﻿using minihex.engine.Model.Enums;
 using minihex.engine.Randoms;
-using System.Runtime.CompilerServices;
 
-namespace minihex.engine.Model
+namespace minihex.engine.Model.Nodes
 {
     public class StateNode
     {
@@ -12,7 +11,7 @@ namespace minihex.engine.Model
         public int VisitCount = 0;
         public int WinCount = 0;
 
-        public double WinningRatio => (VisitCount == 0 && this.Parent is not null ? 0.5 * (1 - this.Parent.WinningRatio) : (double)WinCount / VisitCount);
+        public double WinningRatio => VisitCount == 0 && Parent is not null ? 0.5 * (1 - Parent.WinningRatio) : (double)WinCount / VisitCount;
 
         public List<int> moves = new();
         public bool IsTerminal = true;
@@ -23,70 +22,70 @@ namespace minihex.engine.Model
 
         public StateNode(int nextMove, StateNode? parent = null)
         {
-            this.Children = new List<StateNode>();
-            this.Parent = parent;
-            if (this.Parent != null)
+            Children = new List<StateNode>();
+            Parent = parent;
+            if (Parent != null)
             {
-                this.moves.AddRange(this.Parent.moves);
-                this.moves.Add(nextMove);
+                moves.AddRange(Parent.moves);
+                moves.Add(nextMove);
             }
-            this.UpdateDecidingValue();
+            UpdateDecidingValue();
         }
 
-        protected virtual void UpdateDecidingValue()
+        public virtual void UpdateDecidingValue()
         {
-            if (this.Parent != null)
+            if (Parent != null)
             {
                 if (VisitCount == 0)
                 {
-                    this.DecidingValue = Double.PositiveInfinity;
+                    DecidingValue = double.PositiveInfinity;
                 }
                 else
                 {
-                    this.DecidingValue = (double)WinCount / VisitCount
-                        + Exploration * Math.Sqrt(Math.Log(this.Parent.VisitCount) / VisitCount);
+                    DecidingValue = (double)WinCount / VisitCount
+                        + Exploration * Math.Sqrt(Math.Log(Parent.VisitCount) / VisitCount);
                 }
             }
         }
 
         public StateNode FetchBestMove()
         {
-            if (this.IsTerminal)
+            if (IsTerminal)
             {
                 return this;
             }
             else
             {
-                return this.Children.OrderByDescending(c => c.WinningRatio).ToList().First();
+                return Children.OrderByDescending(c => c.WinningRatio).ToList().First();
             }
         }
 
         public void PrependMoves(List<int> premoves)
         {
-            this.moves.AddRange(premoves);
+            moves.AddRange(premoves);
         }
 
         public StateNode Traverse()
         {
-            if (this.IsTerminal) return this;
+            if (IsTerminal) return this;
 
-            return this.Children.Where(c => !c.GameFinished)
+            return Children.Where(c => !c.GameFinished)
                 .OrderByDescending(c => c.DecidingValue).First().Traverse();
         }
 
         // returns random child
         public StateNode Expand(int size)
         {
-            this.IsTerminal = false;
+            IsTerminal = false;
             var avMoves = GetAvailableMoves(size);
 
             for (int i = 0; i < avMoves.Count; i++)
             {
-                this.Children.Add(ConstructNode(avMoves[i], this));
+                Children.Add(ConstructNode(avMoves[i], this));
             }
 
-            var childIdx = RandomSource.Rand.Next(0, this.Children.Count);
-            return this.Children[childIdx];
+            var childIdx = RandomSource.Rand.Next(0, Children.Count);
+            return Children[childIdx];
         }
 
         protected virtual StateNode ConstructNode(int nextMove, StateNode? parent = null)
@@ -100,30 +99,30 @@ namespace minihex.engine.Model
 
             for (int i = 0; i < moves.Count - 1; i++)
             {
-                this.MakeMove(game, moves[i], i + 1);
+                MakeMove(game, moves[i], i + 1);
             }
             if (game.IsFinished(moves.Count - 1))
             {
-                this.Parent!.GameFinished = true;
-                this.Parent.WinCount = 0;
-                this.Parent.VisitCount = 0;
-                this.Parent.BackPropagate(!ShouldUpdateWin(game.WhoWon()));
-                this.Parent.BackPropagateValue();
-                this.Parent.IsTerminal = true;
+                Parent!.GameFinished = true;
+                Parent.WinCount = 0;
+                Parent.VisitCount = 0;
+                Parent.BackPropagate(!ShouldUpdateWin(game.WhoWon()), game.Moves);
+                Parent.BackPropagateValue();
+                Parent.IsTerminal = true;
                 return;
             }
             else
             {
-                this.MakeMove(game, moves[^1], moves.Count);
+                MakeMove(game, moves[^1], moves.Count);
             }
 
-            this.PlayoutInternal(game, size, out int moveNumber);
-            this.GameFinished = moveNumber == 0;
+            PlayoutInternal(game, size, out int moveNumber);
+            GameFinished = moveNumber == 0;
 
             var winningColor = game.WhoWon();
             var shouldUpdateWin = ShouldUpdateWin(winningColor);
 
-            BackPropagate(shouldUpdateWin);
+            BackPropagate(shouldUpdateWin, game.Moves);
             BackPropagateValue();
         }
 
@@ -134,15 +133,15 @@ namespace minihex.engine.Model
 
         private bool ShouldUpdateWin(PlayerColor color)
         {
-            return (color == Enums.PlayerColor.White && moves.Count % 2 == 1)
-                || (color == Enums.PlayerColor.Black && moves.Count % 2 == 0);
+            return color == PlayerColor.White && moves.Count % 2 == 1
+                || color == PlayerColor.Black && moves.Count % 2 == 0;
         }
 
-        public void BackPropagate(bool shouldUpdateWin)
+        public virtual void BackPropagate(bool shouldUpdateWin, List<int> moves)
         {
-            this.VisitCount++;
-            if (shouldUpdateWin) this.WinCount++;
-            this.Parent?.BackPropagate(!shouldUpdateWin);
+            VisitCount++;
+            if (shouldUpdateWin) WinCount++;
+            Parent?.BackPropagate(!shouldUpdateWin, moves);
         }
 
         public void BackPropagateValue()
@@ -164,7 +163,7 @@ namespace minihex.engine.Model
 
         protected virtual List<int> GetAvailableMoves(int size)
         {
-            return Enumerable.Range(0, size * size).Except(this.moves).ToList();
+            return Enumerable.Range(0, size * size).Except(moves).ToList();
         }
     }
 }

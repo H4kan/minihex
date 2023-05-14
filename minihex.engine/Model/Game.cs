@@ -4,6 +4,7 @@ namespace minihex.engine.Model
 {
     public class Game
     {
+        public List<int> Moves => _moves;
         public PlayerColor[,] Board;
         public int Size;
 

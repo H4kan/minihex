@@ -1,7 +1,7 @@
 ﻿using minihex.engine.Model.Enums;
 using minihex.engine.Randoms;
 
-namespace minihex.engine.Model
+namespace minihex.engine.Model.Nodes
 {
     public class BridgeStateNode : StateNode
     {
@@ -54,15 +54,15 @@ namespace minihex.engine.Model
             var col = lastMove % game.Size;
 
             var existTopLeft = row > 0;
-            
-            var existRight = (col < game.Size - 1);
+
+            var existRight = col < game.Size - 1;
             var existLeft = col > 0;
 
             var existTopRight = existTopLeft && existRight;
             var existBottomRight = row < game.Size - 1;
 
-            var existBottomLeft = existLeft && existBottomRight; 
-           
+            var existBottomLeft = existLeft && existBottomRight;
+
             if (existLeft && existTopRight && existTopLeft)
             {
                 // top left
@@ -92,7 +92,7 @@ namespace minihex.engine.Model
                     game.GetColor(row + 1, col) == nextPlayer
                     && game.GetColor(row, col + 1) == PlayerColor.None)
                 {
-                    bridgedList.Add((row) * game.Size + col + 1);
+                    bridgedList.Add(row * game.Size + col + 1);
                 }
             }
 
@@ -125,7 +125,7 @@ namespace minihex.engine.Model
                     game.GetColor(row + 1, col - 1) == nextPlayer
                     && game.GetColor(row, col - 1) == PlayerColor.None)
                 {
-                    bridgedList.Add((row) * game.Size + col - 1);
+                    bridgedList.Add(row * game.Size + col - 1);
                 }
             }
 

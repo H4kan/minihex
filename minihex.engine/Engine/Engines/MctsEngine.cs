@@ -1,4 +1,5 @@
 ﻿using minihex.engine.Model;
+using minihex.engine.Model.Nodes;
 
 namespace minihex.engine.Engine.Engines
 {
@@ -6,13 +7,13 @@ namespace minihex.engine.Engine.Engines
     {
         protected virtual int MaxIteration => 5000;
         protected StateNode? _root;
-        private CancellationToken _cancellationToken;
+        private readonly CancellationToken _cancellationToken;
 
         public MctsEngine(GameExt game, CancellationToken cancellationToken) : base(game) 
         { 
-            this._cancellationToken = cancellationToken;
+            _cancellationToken = cancellationToken;
         }
-
+         
         private void ConductIteration()
         {
             var selection = _root!.Traverse();
@@ -42,7 +43,7 @@ namespace minihex.engine.Engine.Engines
         public override int GetNextMove(int moveNumber)
         {
             var preMoves = Game.GetPreMoves(moveNumber);
-            ConductAlgorithm(preMoves, this._cancellationToken);
+            ConductAlgorithm(preMoves, _cancellationToken);
 
             return _root!.FetchBestMove().moves.Last();
         }
