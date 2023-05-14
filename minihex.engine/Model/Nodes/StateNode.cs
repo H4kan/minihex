@@ -21,10 +21,13 @@ namespace minihex.engine.Model.Nodes
         public List<StateNode> Children { get; }
         public StateNode? Parent { get; set; }
 
-        public StateNode(int nextMove, StateNode? parent = null)
+        protected bool Swap { get; set; }
+
+        public StateNode(int nextMove, bool swap, StateNode? parent = null)
         {
             Children = new List<StateNode>();
             Parent = parent;
+            this.Swap = swap;
             if (Parent != null)
             {
                 moves.AddRange(Parent.moves);
@@ -91,7 +94,7 @@ namespace minihex.engine.Model.Nodes
 
         protected virtual StateNode ConstructNode(int nextMove, StateNode? parent = null)
         {
-            return new StateNode(nextMove, parent);
+            return new StateNode(nextMove, this.Swap, parent);
         }
 
         protected virtual GameExt ConstructSimulationGame(int size, bool swap)
@@ -101,7 +104,7 @@ namespace minihex.engine.Model.Nodes
 
         public void Playout(int size)
         {
-            var game = ConstructSimulationGame(size, false);
+            var game = ConstructSimulationGame(size, this.Swap);
 
             for (int i = 0; i < moves.Count - 1; i++)
             {
@@ -158,13 +161,35 @@ namespace minihex.engine.Model.Nodes
 
         private void PlayoutInternal(GameExt game, int size, out int moveNumber)
         {
-            var avMoves = GetAvailableMoves(size).OrderBy(x => RandomSource.Rand.Next()).ToList();
+            var avMoves = GetAvailableMoves(size);
+            int firstIdx = -1;
+            if (this.Swap && moves.Count == 1)
+            {
+                firstIdx = avMoves[0];
+                avMoves.RemoveAt(0);
+            }
+            avMoves = avMoves.OrderBy(x => RandomSource.Rand.Next()).ToList();
+            
+            if (firstIdx >= 0)
+            {
+                if (RandomSource.Rand.NextDouble() > 0.3)
+                {
+                    avMoves.Insert(0, firstIdx);
+                }
+            }
+            
+
             game.SimulatePlayout(size, out moveNumber, moves.Count, avMoves);
         }
 
         protected virtual List<int> GetAvailableMoves(int size)
         {
-            return Enumerable.Range(0, size * size).Except(moves).ToList();
+            var avMoves = Enumerable.Range(0, size * size).Except(moves).ToList();
+            if (this.Swap && moves.Count == 1)
+            {
+                avMoves.Insert(0, moves[0]);
+            }
+            return avMoves;
         }
     }
 }

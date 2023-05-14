@@ -10,7 +10,7 @@ namespace minihex.engine.Engine.Engines
 
         protected override StateNode CreateRoot()
         {
-            return new AmafStateNode(0);
+            return new AmafStateNode(0, Game.Swap);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace minihex.engine.Engine.Engines
 
         protected virtual StateNode CreateRoot()
         {
-            return new StateNode(0);
+            return new StateNode(0, Game.Swap);
         }
 
         private void ConductAlgorithm(List<int> preMoves, CancellationToken cancellationToken)

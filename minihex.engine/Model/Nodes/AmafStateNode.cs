@@ -2,7 +2,7 @@
 {
     public class AmafStateNode : StateNode
     {
-        public AmafStateNode(int nextMove, StateNode? parent = null) : base(nextMove, parent)
+        public AmafStateNode(int nextMove, bool swap, StateNode? parent = null) : base(nextMove, swap, parent)
         { }
 
         public override void BackPropagate(bool shouldUpdateWin, List<int> moves)
@@ -23,7 +23,7 @@
 
         protected override StateNode ConstructNode(int nextMove, StateNode? parent = null)
         {
-            return new AmafStateNode(nextMove, parent);
+            return new AmafStateNode(nextMove, this.Swap, parent);
         }
 
         private static void AmafUpdate(StateNode node, List<int> moves, bool shouldUpdateWin)
