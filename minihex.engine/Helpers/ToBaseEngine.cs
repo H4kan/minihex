@@ -13,6 +13,7 @@ namespace minihex.engine
                 Algorithm.Human => null,
                 Algorithm.Heuristic => new HeuristicEngine(game),
                 Algorithm.MCTS => new MctsEngine(game, cancellationToken),
+                Algorithm.MCTSwSavebridge => new MctsBridgeEngine(game, cancellationToken),
                 _ => new RandomEngine(game),
             };
         }

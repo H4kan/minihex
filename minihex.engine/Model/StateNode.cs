@@ -1,5 +1,6 @@
 ﻿using minihex.engine.Model.Enums;
 using minihex.engine.Randoms;
+using System.Runtime.CompilerServices;
 
 namespace minihex.engine.Model
 {
@@ -81,11 +82,16 @@ namespace minihex.engine.Model
 
             for (int i = 0; i < avMoves.Count; i++)
             {
-                this.Children.Add(new StateNode(avMoves[i], this));
+                this.Children.Add(ConstructNode(avMoves[i], this));
             }
 
             var childIdx = RandomSource.Rand.Next(0, this.Children.Count);
             return this.Children[childIdx];
+        }
+
+        protected virtual StateNode ConstructNode(int nextMove, StateNode? parent = null)
+        {
+            return new StateNode(nextMove, parent);
         }
 
         public void Playout(int size)
@@ -94,7 +100,7 @@ namespace minihex.engine.Model
 
             for (int i = 0; i < moves.Count - 1; i++)
             {
-                game.MakeMove(moves[i], i + 1, true);
+                this.MakeMove(game, moves[i], i + 1);
             }
             if (game.IsFinished(moves.Count - 1))
             {
@@ -108,16 +114,10 @@ namespace minihex.engine.Model
             }
             else
             {
-                game.MakeMove(moves[^1], moves.Count, true);
+                this.MakeMove(game, moves[^1], moves.Count);
             }
 
-            var avMoves = GetAvailableMoves(size).OrderBy(x => RandomSource.Rand.Next()).ToList();
-
-            int moveNumber = 0;
-            while (!game.IsFinished(moveNumber + moves.Count))
-            {
-                game.MakeMove(avMoves[moveNumber], ++moveNumber + moves.Count, true);
-            }
+            this.PlayoutInternal(game, size, out int moveNumber);
             this.GameFinished = moveNumber == 0;
 
             var winningColor = game.WhoWon();
@@ -125,6 +125,11 @@ namespace minihex.engine.Model
 
             BackPropagate(shouldUpdateWin);
             BackPropagateValue();
+        }
+
+        protected virtual void MakeMove(GameExt game, int fieldIdx, int moveNumber)
+        {
+            game.MakeMove(fieldIdx, moveNumber, true);
         }
 
         private bool ShouldUpdateWin(PlayerColor color)
@@ -146,7 +151,18 @@ namespace minihex.engine.Model
             Parent?.BackPropagateValue();
         }
 
-        private List<int> GetAvailableMoves(int size)
+        protected virtual void PlayoutInternal(GameExt game, int size, out int moveNumber)
+        {
+            var avMoves = GetAvailableMoves(size).OrderBy(x => RandomSource.Rand.Next()).ToList();
+
+            moveNumber = 0;
+            while (!game.IsFinished(moveNumber + moves.Count))
+            {
+                game.MakeMove(avMoves[moveNumber], ++moveNumber + moves.Count, true);
+            }
+        }
+
+        protected virtual List<int> GetAvailableMoves(int size)
         {
             return Enumerable.Range(0, size * size).Except(this.moves).ToList();
         }

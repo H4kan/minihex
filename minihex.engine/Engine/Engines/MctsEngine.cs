@@ -4,8 +4,8 @@ namespace minihex.engine.Engine.Engines
 {
     public class MctsEngine : BaseEngine
     {
-        private static readonly int MaxIteration = 100000;
-        private StateNode? _root;
+        protected virtual int MaxIteration => 5000;
+        protected StateNode? _root;
         private CancellationToken _cancellationToken;
 
         public MctsEngine(GameExt game, CancellationToken cancellationToken) : base(game) 
@@ -21,10 +21,15 @@ namespace minihex.engine.Engine.Engines
             expansion.Playout(Game.Size);
         }
 
+        protected virtual StateNode CreateRoot()
+        {
+            return new StateNode(0);
+        }
+
         private void ConductAlgorithm(List<int> preMoves, CancellationToken cancellationToken)
         {
             int i = 0;
-            _root = new StateNode(0);
+            _root = CreateRoot();
             _root.PrependMoves(preMoves);
 
             while (i++ < MaxIteration)
