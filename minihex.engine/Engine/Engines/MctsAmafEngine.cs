@@ -1,4 +1,4 @@
-﻿using minihex.engine.Model;
+﻿using minihex.engine.Model.Games;
 using minihex.engine.Model.Nodes;
 
 namespace minihex.engine.Engine.Engines

@@ -1,4 +1,5 @@
 ﻿using minihex.engine.Model.Enums;
+using minihex.engine.Model.Games;
 using minihex.engine.Randoms;
 
 namespace minihex.engine.Model.Nodes
@@ -93,9 +94,14 @@ namespace minihex.engine.Model.Nodes
             return new StateNode(nextMove, parent);
         }
 
+        protected virtual GameExt ConstructSimulationGame(int size, bool swap)
+        {
+            return new GameExt(size, swap);
+        }
+
         public void Playout(int size)
         {
-            var game = new GameExt(size, false);
+            var game = ConstructSimulationGame(size, false);
 
             for (int i = 0; i < moves.Count - 1; i++)
             {
@@ -150,15 +156,10 @@ namespace minihex.engine.Model.Nodes
             Parent?.BackPropagateValue();
         }
 
-        protected virtual void PlayoutInternal(GameExt game, int size, out int moveNumber)
+        private void PlayoutInternal(GameExt game, int size, out int moveNumber)
         {
             var avMoves = GetAvailableMoves(size).OrderBy(x => RandomSource.Rand.Next()).ToList();
-
-            moveNumber = 0;
-            while (!game.IsFinished(moveNumber + moves.Count))
-            {
-                game.MakeMove(avMoves[moveNumber], ++moveNumber + moves.Count, true);
-            }
+            game.SimulatePlayout(size, out moveNumber, moves.Count, avMoves);
         }
 
         protected virtual List<int> GetAvailableMoves(int size)

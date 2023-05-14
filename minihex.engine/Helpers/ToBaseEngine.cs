@@ -1,5 +1,5 @@
 ﻿using minihex.engine.Engine.Engines;
-using minihex.engine.Model;
+using minihex.engine.Model.Games;
 using minihex.engine.Models.Enums;
 
 namespace minihex.engine
@@ -15,6 +15,7 @@ namespace minihex.engine
                 Algorithm.MCTS => new MctsEngine(game, cancellationToken),
                 Algorithm.MCTSwSavebridge => new MctsBridgeEngine(game, cancellationToken),
                 Algorithm.MSTSwAMAF => new MctsAmafEngine(game, cancellationToken),
+                Algorithm.MCTSwAMAFandSavebridge => new MctsAmafBridgeEngine(game, cancellationToken),
                 _ => new RandomEngine(game),
             };
         }

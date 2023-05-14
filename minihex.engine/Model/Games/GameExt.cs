@@ -1,6 +1,6 @@
 ﻿using minihex.engine.Model.Enums;
 
-namespace minihex.engine.Model
+namespace minihex.engine.Model.Games
 {
     public class GameExt : Game
     {
@@ -63,6 +63,15 @@ namespace minihex.engine.Model
             }
 
             return (path, winningColor);
+        }
+
+        public virtual void SimulatePlayout(int size, out int moveNumber, int prevMovesCounter, List<int> avMoves)
+        {
+            moveNumber = 0;
+            while (!IsFinished(moveNumber + prevMovesCounter))
+            {
+                MakeMove(avMoves[moveNumber], ++moveNumber + prevMovesCounter, true);
+            }
         }
     }
 }

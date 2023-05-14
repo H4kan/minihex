@@ -1,6 +1,6 @@
 ﻿using minihex.engine.Model.Enums;
 
-namespace minihex.engine.Model
+namespace minihex.engine.Model.Games
 {
     public class Game
     {
@@ -12,9 +12,9 @@ namespace minihex.engine.Model
 
         public Game(int size, bool swap)
         {
-            this.Board = new PlayerColor[size, size];
+            Board = new PlayerColor[size, size];
             _moves = new List<int>();
-            this.Size = size;
+            Size = size;
         }
 
 
@@ -22,7 +22,7 @@ namespace minihex.engine.Model
         {
             if (_moves.Count == moveNumber - 1)
             {
-                this.Board[fieldIdx / Size, fieldIdx % Size] = 
+                Board[fieldIdx / Size, fieldIdx % Size] =
                     moveNumber % 2 == 0 ? PlayerColor.Black : PlayerColor.White;
                 _moves.Add(fieldIdx);
             }
