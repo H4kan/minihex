@@ -1,4 +1,4 @@
-﻿using minihex.engine.Model;
+﻿using minihex.engine.Model.Games;
 using minihex.engine.Model.Nodes;
 
 namespace minihex.engine.Engine.Engines
@@ -9,11 +9,11 @@ namespace minihex.engine.Engine.Engines
         protected StateNode? _root;
         private readonly CancellationToken _cancellationToken;
 
-        public MctsEngine(GameExt game, CancellationToken cancellationToken) : base(game) 
-        { 
+        public MctsEngine(GameExt game, CancellationToken cancellationToken) : base(game)
+        {
             _cancellationToken = cancellationToken;
         }
-         
+
         private void ConductIteration()
         {
             var selection = _root!.Traverse();

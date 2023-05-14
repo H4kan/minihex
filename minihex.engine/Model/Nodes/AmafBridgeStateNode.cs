@@ -2,13 +2,13 @@
 
 namespace minihex.engine.Model.Nodes
 {
-    public class BridgeStateNode : StateNode
+    public class AmafBridgeStateNode : AmafStateNode
     {
-        public BridgeStateNode(int nextMove, StateNode? parent = null) : base(nextMove, parent) { }
+        public AmafBridgeStateNode(int nextMove, StateNode? parent = null) : base(nextMove, parent) { }
 
         protected override StateNode ConstructNode(int nextMove, StateNode? parent = null)
         {
-            return new BridgeStateNode(nextMove, parent);
+            return new AmafBridgeStateNode(nextMove, parent);
         }
 
         protected override GameExt ConstructSimulationGame(int size, bool swap)

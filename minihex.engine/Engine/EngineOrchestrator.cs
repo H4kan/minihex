@@ -1,5 +1,5 @@
 ﻿using minihex.engine.Engine.Engines;
-using minihex.engine.Model;
+using minihex.engine.Model.Games;
 using minihex.engine.Model.Requests;
 using minihex.engine.Randoms;
 
@@ -32,7 +32,7 @@ namespace minihex.engine.Engine
                 {
                     _currentTask.Wait();
                 }
-                catch (TaskCanceledException) {}
+                catch (TaskCanceledException) { }
                 catch (Exception ex)
                 {
                     if (ex.InnerException is not TaskCanceledException)
@@ -40,15 +40,15 @@ namespace minihex.engine.Engine
                         throw;
                     }
                 }
-                finally 
-                { 
+                finally
+                {
                     _engineProcessTokenSource?.Dispose();
                 }
             }
             #endregion
 
             _moveNumber = 0;
- 
+
             _readyList = Enumerable.Range(0, request.Size * request.Size)
                 .Select(i => false).ToList();
 
