@@ -35,7 +35,7 @@ namespace minihex.engine.Engine
                 catch (TaskCanceledException) {}
                 catch (Exception ex)
                 {
-                    if (!(ex.InnerException is TaskCanceledException))
+                    if (ex.InnerException is not TaskCanceledException)
                     {
                         throw;
                     }
