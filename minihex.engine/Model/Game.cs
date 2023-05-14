@@ -32,6 +32,11 @@ namespace minihex.engine.Model
             return _moves[moveNumber - 1];
         }
 
+        public PlayerColor GetColor(int row, int col)
+        {
+            return Board[row, col];
+        }
+
         public List<int> GetPreMoves(int moveNumber)
         {
             return _moves.Take(moveNumber - 1).ToList();

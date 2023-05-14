@@ -6,11 +6,11 @@ namespace minihex.engine.Model
     {
         private bool _isFinished = false;
 
-        public GraphRepresentation _redWhiteRepresentation;
-        public GraphRepresentation _redBlackRepresentation;
+        public readonly GraphRepresentation _redWhiteRepresentation;
+        public readonly GraphRepresentation _redBlackRepresentation;
 
-        private readonly GraphRepresentation _whiteRepresentation;
-        private readonly GraphRepresentation _blackRepresentation;
+        public readonly GraphRepresentation _whiteRepresentation;
+        public readonly GraphRepresentation _blackRepresentation;
 
         public GameExt(int size, bool swap) : base(size, swap)
         {
