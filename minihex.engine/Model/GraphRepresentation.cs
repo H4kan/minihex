@@ -119,9 +119,17 @@ namespace minihex.engine.Model
         public void ColorVertice(int i, PlayerColor color)
         {
             this.Vertices[i] = color;
-            
-            if (color != TargetColor)
+
+            if (this.AwaitingSwap)
             {
+                if (i != this.FirstVertice)
+                {
+                    this.KillVertice(this.FirstVertice);
+                }
+                this.AwaitingSwap = false;
+            }
+            if (color != TargetColor)
+            {   
                 if (Swap)
                 {
                     this.FirstVertice = i;
@@ -133,14 +141,7 @@ namespace minihex.engine.Model
                     this.KillVertice(i);
                 }
             }
-            if (this.AwaitingSwap)
-            {
-                if (i != this.FirstVertice)
-                {
-                    this.KillVertice(this.FirstVertice);
-                }
-                this.AwaitingSwap = false;
-            }
+            
             this.WinningPath = null;
         }
 
