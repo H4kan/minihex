@@ -9,7 +9,7 @@ namespace minihex.engine.Engine.Engines
 
         protected override StateNode CreateRoot()
         {
-            return new AmafBridgeStateNode(0);
+            return new AmafBridgeStateNode(0, Game.Swap);
         }
     }
 }

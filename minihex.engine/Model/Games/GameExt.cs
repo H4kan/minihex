@@ -12,13 +12,16 @@ namespace minihex.engine.Model.Games
         public readonly GraphRepresentation _whiteRepresentation;
         public readonly GraphRepresentation _blackRepresentation;
 
+        public bool Swap { get; private set; }
+
         public GameExt(int size, bool swap) : base(size, swap)
         {
+            this.Swap = swap;
             _redWhiteRepresentation = new GraphRepresentation(size, PlayerColor.White);
-            _redBlackRepresentation = new GraphRepresentation(size, PlayerColor.Black);
+            _redBlackRepresentation = new GraphRepresentation(size, PlayerColor.Black, swap);
 
             _whiteRepresentation = new GraphRepresentation(size, PlayerColor.White);
-            _blackRepresentation = new GraphRepresentation(size, PlayerColor.Black);
+            _blackRepresentation = new GraphRepresentation(size, PlayerColor.Black, swap);
         }
 
         public bool IsFinished(int moveNumber)

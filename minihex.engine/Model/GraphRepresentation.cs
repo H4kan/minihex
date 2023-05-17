@@ -27,15 +27,21 @@ namespace minihex.engine.Model
         private byte LeftMask { get; set; }
         private byte RightMask { get; set; }
 
+        private bool Swap { get; set; }
+        private int FirstVertice { get; set; }
+        private bool AwaitingSwap { get; set; }
+
         private List<int>? WinningPath { get; set; }
 
-        public GraphRepresentation(int size, PlayerColor targetColor)
+        public GraphRepresentation(int size, PlayerColor targetColor, bool swap = false)
         {
             this.Edges = new byte[size * size, size * size];
             this.DeadVertice = new bool[size * size];
             this.Vertices = new PlayerColor[size * size];
             this.SideVertices = new byte[size * size];
             this.Size = size;
+            this.Swap = swap;
+            this.AwaitingSwap = false;
 
             this.SetupEmptyBoard();
             TargetColor = targetColor;
@@ -113,10 +119,29 @@ namespace minihex.engine.Model
         public void ColorVertice(int i, PlayerColor color)
         {
             this.Vertices[i] = color;
-            if (color != TargetColor)
+
+            if (this.AwaitingSwap)
             {
-                this.KillVertice(i);
+                if (i != this.FirstVertice)
+                {
+                    this.KillVertice(this.FirstVertice);
+                }
+                this.AwaitingSwap = false;
             }
+            if (color != TargetColor)
+            {   
+                if (Swap)
+                {
+                    this.FirstVertice = i;
+                    this.AwaitingSwap = true;
+                    this.Swap = false;
+                }
+                else
+                {
+                    this.KillVertice(i);
+                }
+            }
+            
             this.WinningPath = null;
         }
 
@@ -124,7 +149,7 @@ namespace minihex.engine.Model
         public void ColorVerticeAndReduce(int i, PlayerColor color)
         {
             this.ColorVertice(i, color);
-
+ 
             // isolate diff color vertice and kill it
 
             if (color == TargetColor)

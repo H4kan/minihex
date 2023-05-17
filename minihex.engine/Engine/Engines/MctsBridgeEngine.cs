@@ -11,7 +11,7 @@ namespace minihex.engine.Engine.Engines
 
         protected override StateNode CreateRoot()
         {
-            return new BridgeStateNode(0);
+            return new BridgeStateNode(0, Game.Swap);
         }
     }
 }
