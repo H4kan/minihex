@@ -69,12 +69,18 @@ namespace minihex.engine.Model.Nodes
             moves.AddRange(premoves);
         }
 
-        public StateNode Traverse()
+        public StateNode? Traverse()
         {
             if (IsTerminal) return this;
 
-            return Children.Where(c => !c.GameFinished)
-                .OrderByDescending(c => c.DecidingValue).First().Traverse();
+            var notCompletedChildren = Children.Where(c => !c.GameFinished);
+            if (notCompletedChildren.Any())
+            {
+                return notCompletedChildren
+                    .OrderByDescending(c => c.DecidingValue)?.First().Traverse();
+            }
+
+            return null;
         }
 
         // returns random child
@@ -118,6 +124,8 @@ namespace minihex.engine.Model.Nodes
                 Parent.BackPropagate(!ShouldUpdateWin(game.WhoWon()), game.Moves);
                 Parent.BackPropagateValue();
                 Parent.IsTerminal = true;
+                Parent?.TryToBackPropagateGameFinished();
+
                 return;
             }
             else
@@ -126,7 +134,11 @@ namespace minihex.engine.Model.Nodes
             }
 
             PlayoutInternal(game, size, out int moveNumber);
-            GameFinished = moveNumber == 0;
+            if (moveNumber == 0)
+            {
+                GameFinished = true;
+                TryToBackPropagateGameFinished();
+            }
 
             var winningColor = game.WhoWon();
             var shouldUpdateWin = ShouldUpdateWin(winningColor);
@@ -144,6 +156,15 @@ namespace minihex.engine.Model.Nodes
         {
             return color == PlayerColor.White && moves.Count % 2 == 1
                 || color == PlayerColor.Black && moves.Count % 2 == 0;
+        }
+
+        private void TryToBackPropagateGameFinished()
+        {
+            if (Parent is not null && Parent.Children.All(x => x.GameFinished))
+            {
+                Parent.GameFinished = true;
+                Parent.TryToBackPropagateGameFinished();
+            }
         }
 
         public virtual void BackPropagate(bool shouldUpdateWin, List<int> moves)
