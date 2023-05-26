@@ -12,7 +12,7 @@ namespace minihex.engine.test.Hypothesis
     public class Hypothesis3Tests
     {
         private readonly SeedHelperIterator _seedIterator = new();
-        private const int NumberOfTests = 2;
+        private const int NumberOfTests = 20;
         private const int GameSize = 7;
         
         [TestMethod]
