@@ -5,8 +5,8 @@
         public static void SaveContentToFile(List<string> content, string fileName)
         {
             var fullPath = Directory.GetCurrentDirectory();
-            var projectPath = fullPath.Remove(fullPath.IndexOf("minihex")+1);
-            var directoryFilePath = $"{projectPath}/analysis/testresults";
+            var projectPath = fullPath.Remove(fullPath.IndexOf("minihex"));
+            var directoryFilePath = $"{projectPath}/minihex/analysis/testresults";
 
             if (!Directory.Exists(directoryFilePath))
             {
