@@ -5,13 +5,14 @@ namespace minihex.engine.Engine.Engines
 {
     public class MctsEngine : BaseEngine
     {
-        protected virtual int MaxIteration => 5000;
+        protected virtual int MaxIteration { get; set; } = 5000;
         protected StateNode? _root;
         private readonly CancellationToken _cancellationToken;
 
-        public MctsEngine(GameExt game, CancellationToken cancellationToken) : base(game)
+        public MctsEngine(GameExt game, CancellationToken cancellationToken, int? maxIterations = null) : base(game)
         {
             _cancellationToken = cancellationToken;
+            MaxIteration = maxIterations ?? MaxIteration;
         }
 
         private void ConductIteration()
