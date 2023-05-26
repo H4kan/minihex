@@ -14,7 +14,7 @@ namespace minihex.engine.test.Hypothesis
         private readonly SeedHelperIterator _seedIterator = new();
         private const int NumberOfTests = 20;
         private const int GameSize = 7;
-        
+
         [TestMethod]
         public void RunTests()
         {
@@ -25,12 +25,15 @@ namespace minihex.engine.test.Hypothesis
         private List<string> CalculateWinRatiosForAlgorithms()
         {
             var lines = new List<string>() { "Algorithm WinRatio" };
+            double totalWinRatioFactor = 0;
 
             foreach (var enemyAlg in EnemyEngines())
             {
                 double winRatio = CalculateWinRatioForAlgorithm(enemyAlg);
+                totalWinRatioFactor += winRatio;
                 lines.Add($"{enemyAlg} {winRatio}");
             }
+            lines.Add($"Aggregated {totalWinRatioFactor / EnemyEngines().Count()}");
 
             return lines;
         }
