@@ -14,7 +14,7 @@ namespace minihex.engine.Model.Games
 
         public bool Swap { get; private set; }
 
-        public GameExt(int size, bool swap) : base(size, swap)
+        public GameExt(int size, bool swap) : base(size)
         {
             this.Swap = swap;
             _redWhiteRepresentation = new GraphRepresentation(size, PlayerColor.White);
