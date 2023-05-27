@@ -1,0 +1,16 @@
+Algorithm Iterations WinRatio
+MCTS 50 0
+MCTS 100 0
+MCTS 150 0
+MCTS 200 0
+MCTS 250 0
+MCTS 300 0
+MCTS 350 0
+MCTS 400 0
+MCTS 450 0
+MCTS 500 0
+MCTSwSavebridge 50 0,2
+MCTSwSavebridge 100 0,2
+MCTSwSavebridge 150 0,2
+MCTSwSavebridge 200 0,2
+MCTSwSavebridge 250 0,2

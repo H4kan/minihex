@@ -11,7 +11,7 @@ namespace minihex.engine.test.Hypothesis
     /// będą wygrywać z algorytmem heurystycznym w wariancie SWAP
     /// </summary>
     [TestClass]
-    public class Hypothesis5Tests
+    public class Hypothesis56Tests
     {
         private readonly SeedHelperIterator _seedIterator = new();
         private const int NumberOfTestsForEachSeed = 2;
@@ -66,7 +66,6 @@ namespace minihex.engine.test.Hypothesis
 
             return wins;
         }
-
 
         public static EnginesSetupConfiguration CreateEnginesConfiguration(int gameSize, Algorithm engine1, Algorithm engine2, int? maxIterations)
         {
