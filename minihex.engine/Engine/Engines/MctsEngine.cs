@@ -15,12 +15,16 @@ namespace minihex.engine.Engine.Engines
             MaxIteration = maxIterations ?? MaxIteration;
         }
 
-        private void ConductIteration()
+        private bool ConductIteration()
         {
             var selection = _root!.Traverse();
-            var expansion = selection.Expand(Game.Size);
+            if (selection is null)
+                return false;
 
-            expansion.Playout(Game.Size);
+            var expansion = selection.Expand(Game.Size);
+            expansion?.Playout(Game.Size);
+
+            return true;
         }
 
         protected virtual StateNode CreateRoot()
@@ -36,7 +40,8 @@ namespace minihex.engine.Engine.Engines
 
             while (i++ < MaxIteration)
             {
-                ConductIteration();
+                if (!ConductIteration()) break;
+
                 cancellationToken.ThrowIfCancellationRequested();
             }
         }
