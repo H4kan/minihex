@@ -1,7 +1,6 @@
 ﻿using minihex.engine.Models.Enums;
 using minihex.engine.Randoms;
 using minihex.engine.test.Helpers;
-using minihex.engine.test.Models;
 
 namespace minihex.engine.test.Hypothesis
 {
@@ -12,7 +11,7 @@ namespace minihex.engine.test.Hypothesis
     public class Hypothesis3Tests
     {
         private readonly SeedHelperIterator _seedIterator = new();
-        private const int NumberOfTests = 20;
+        private const int NumberOfRuns = 20; // numberOfGames = NumberOfRuns*5
         private const int GameSize = 7;
 
         [TestMethod]
@@ -27,13 +26,13 @@ namespace minihex.engine.test.Hypothesis
             var lines = new List<string>() { "Algorithm WinRatio" };
             double totalWinRatioFactor = 0;
 
-            foreach (var enemyAlg in EnemyEngines())
+            foreach (var enemyAlg in TestHelpers.GetAllEngines())
             {
                 double winRatio = CalculateWinRatioForAlgorithm(enemyAlg);
                 totalWinRatioFactor += winRatio;
                 lines.Add($"{enemyAlg} {winRatio}");
             }
-            lines.Add($"Aggregated {totalWinRatioFactor / EnemyEngines().Count()}");
+            lines.Add($"Aggregated {totalWinRatioFactor / TestHelpers.GetAllEngines().Count()}");
 
             return lines;
         }
@@ -42,12 +41,12 @@ namespace minihex.engine.test.Hypothesis
         {
             int numberOfWins = 0;
 
-            for (int i = 0; i < NumberOfTests; i++)
+            for (int i = 0; i < NumberOfRuns; i++)
             {
                 numberOfWins += RunSimulationsAndCountWins(enemyAlg);
             }
 
-            return numberOfWins / (double)(NumberOfTests * _seedIterator.Count);
+            return numberOfWins / (double)(NumberOfRuns * _seedIterator.Count);
         }
 
         private int RunSimulationsAndCountWins(Algorithm enemyAlg)
@@ -57,32 +56,12 @@ namespace minihex.engine.test.Hypothesis
             foreach (var seed in _seedIterator)
             {
                 RandomSource.SetSeed(seed);
-                var config = CreateEnginesConfiguration(GameSize, enemyAlg);
+                var config = TestHelpers.CreateEnginesConfiguration(GameSize, enemyAlg);
                 var gameSimulator = new GameSimulator(config);
                 wins += gameSimulator.RunSimulation() == Model.Enums.PlayerColor.White ? 1 : 0;
             }
 
             return wins;
-        }
-
-        public static EnginesSetupConfiguration CreateEnginesConfiguration(int gameSize, Algorithm blackEngine)
-        {
-            return new EnginesSetupConfiguration
-            {
-                Engine1 = Algorithm.Heuristic,
-                Engine2 = blackEngine,
-                GameSize = gameSize,
-                GameSwapMode = false,
-            };
-        }
-
-        public static IEnumerable<Algorithm> EnemyEngines()
-        {
-            yield return Algorithm.Heuristic;
-            yield return Algorithm.MCTS;
-            yield return Algorithm.MCTSwSavebridge;
-            yield return Algorithm.MSTSwAMAF;
-            yield return Algorithm.MCTSwAMAFandSavebridge;
         }
     }
 }

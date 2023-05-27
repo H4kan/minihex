@@ -2,7 +2,6 @@
 using minihex.engine.Models.Enums;
 using minihex.engine.Randoms;
 using minihex.engine.test.Helpers;
-using minihex.engine.test.Models;
 
 namespace minihex.engine.test.Hypothesis
 {
@@ -14,7 +13,7 @@ namespace minihex.engine.test.Hypothesis
     public class Hypothesis56Tests
     {
         private readonly SeedHelperIterator _seedIterator = new();
-        private const int NumberOfTestsForEachSeed = 2;
+        private const int NumberOfTestsForEachSeed = 2; // numberOfGamesForEachIteration = NumberOfTestsForEachSeed*10
         private readonly List<int> GameSizes = new() { 5, 7, 9, 11 };
         private const int IterationStep = 50;
         private readonly IEnumerable<int> IterationsRange = Enumerable.Range(1, 10).Select(i => i * IterationStep);
@@ -26,7 +25,7 @@ namespace minihex.engine.test.Hypothesis
             {
                 var lines = new List<string>() { "Algorithm Iterations WinRatio" };
 
-                foreach (var engine in EnginesToCheck())
+                foreach (var engine in TestHelpers.GetMCTSEngines())
                 {
                     foreach (var iter in IterationsRange)
                     {
@@ -50,7 +49,7 @@ namespace minihex.engine.test.Hypothesis
                 numberOfWins += RunSimulationsAndCountWins(Algorithm.Heuristic, engine, iterations, gameSize, PlayerColor.Black);
             }
 
-            return numberOfWins / (double)(NumberOfTestsForEachSeed * _seedIterator.Count);
+            return numberOfWins / (double)(NumberOfTestsForEachSeed * _seedIterator.Count * 2);
         }
 
         private int RunSimulationsAndCountWins(Algorithm whiteAlg, Algorithm blackAlg, int iterations, int gameSize, PlayerColor expectedToWin)
@@ -59,33 +58,12 @@ namespace minihex.engine.test.Hypothesis
             foreach (var seed in _seedIterator)
             {
                 RandomSource.SetSeed(seed);
-                var config = CreateEnginesConfiguration(gameSize, whiteAlg, blackAlg, iterations);
+                var config = TestHelpers.CreateEnginesConfiguration(gameSize, whiteAlg, blackAlg, iterations, true);
                 var gameSimulator = new GameSimulator(config);
                 wins += gameSimulator.RunSimulation() == expectedToWin ? 1 : 0;
             }
 
             return wins;
-        }
-
-        public static EnginesSetupConfiguration CreateEnginesConfiguration(int gameSize, Algorithm engine1, Algorithm engine2, int? maxIterations)
-        {
-            return new EnginesSetupConfiguration
-            {
-                Engine1 = engine1,
-                Engine2 = engine2,
-                GameSize = gameSize,
-                GameSwapMode = true,
-                MaxIterations1 = maxIterations,
-                MaxIterations2 = maxIterations
-            };
-        }
-
-        public static IEnumerable<Algorithm> EnginesToCheck()
-        {
-            yield return Algorithm.MCTS;
-            yield return Algorithm.MCTSwSavebridge;
-            yield return Algorithm.MSTSwAMAF;
-            yield return Algorithm.MCTSwAMAFandSavebridge;
         }
     }
 }
