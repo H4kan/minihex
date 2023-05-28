@@ -15,8 +15,8 @@ namespace minihex.engine.test.Hypothesis
         private readonly SeedHelperIterator _seedIterator = new();
         private const int NumberOfTestsForEachSeedAndEngine = 2; // numberOfGamesForEachIteration = NumberOfTestsForEachSeedAndEngine*25
         private readonly List<int> GameSizes = new() { 5, 9 };
-        private const int IterationStep = 50;
-        private readonly IEnumerable<int> IterationsRange = Enumerable.Range(1, 10).Select(i => i * IterationStep);
+        private const int IterationStep = 100;
+        private readonly IEnumerable<int> IterationsRange = Enumerable.Range(1, 50).Select(i => i * IterationStep);
 
 
         [TestMethod]

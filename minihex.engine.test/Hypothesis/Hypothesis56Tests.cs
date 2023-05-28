@@ -13,10 +13,10 @@ namespace minihex.engine.test.Hypothesis
     public class Hypothesis56Tests
     {
         private readonly SeedHelperIterator _seedIterator = new();
-        private const int NumberOfTestsForEachSeed = 2; // numberOfGamesForEachIteration = NumberOfTestsForEachSeed*10
-        private readonly List<int> GameSizes = new() { 5, 7, 9, 11 };
-        private const int IterationStep = 50;
-        private readonly IEnumerable<int> IterationsRange = Enumerable.Range(1, 10).Select(i => i * IterationStep);
+        private const int NumberOfTestsForEachSeed = 10; // numberOfGamesForEachIteration = NumberOfTestsForEachSeed*10
+        private readonly List<int> GameSizes = new() { 5, 7 };
+        private const int IterationStep = 100;
+        private readonly IEnumerable<int> IterationsRange = Enumerable.Range(1, 70).Select(i => i * IterationStep);
 
         [TestMethod]
         public void RunTests()
