@@ -8,8 +8,9 @@ namespace minihex.engine.test.Helpers
         public static IEnumerable<(Algorithm, Algorithm)> UniqueAlgorithmPairs()
         {
             var values = Enum.GetValues(typeof(Algorithm)).Cast<Algorithm>().ToList().Skip(1);
-            return values.SelectMany((value, index) => values.Skip(index + 1),
-                                     (first, second) => (first, second));
+            return values.SelectMany(value => values,
+                                      (first, second) => (first, second))
+                           .Where(pair => !pair.first.Equals(pair.second)).ToList();
         }
 
         public static EnginesSetupConfiguration CreateEnginesConfiguration(int gameSize, Algorithm engine1, Algorithm engine2, bool swap)
