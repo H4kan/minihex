@@ -26,6 +26,7 @@ namespace minihex.engine.test.Hypothesis
             var lines = new List<string>() { "Algorithm WinRatio" };
             double totalWinRatioFactor = 0;
 
+
             foreach (var enemyAlg in TestHelpers.GetAllEngines())
             {
                 double winRatio = CalculateWinRatioForAlgorithm(enemyAlg);
@@ -41,9 +42,13 @@ namespace minihex.engine.test.Hypothesis
         {
             int numberOfWins = 0;
 
-            for (int i = 0; i < NumberOfRuns; i++)
+            foreach (var seed in _seedIterator)
             {
-                numberOfWins += RunSimulationsAndCountWins(enemyAlg);
+                RandomSource.SetSeed(seed);
+                for (int i = 0; i < NumberOfRuns; i++)
+                {
+                    numberOfWins += RunSimulationsAndCountWins(enemyAlg);
+                }
             }
 
             return numberOfWins / (double)(NumberOfRuns * _seedIterator.Count);
@@ -51,17 +56,9 @@ namespace minihex.engine.test.Hypothesis
 
         private int RunSimulationsAndCountWins(Algorithm enemyAlg)
         {
-            int wins = 0;
-
-            foreach (var seed in _seedIterator)
-            {
-                RandomSource.SetSeed(seed);
-                var config = TestHelpers.CreateEnginesConfiguration(GameSize, enemyAlg);
-                var gameSimulator = new GameSimulator(config);
-                wins += gameSimulator.RunSimulation() == Model.Enums.PlayerColor.White ? 1 : 0;
-            }
-
-            return wins;
+            var config = TestHelpers.CreateEnginesConfiguration(GameSize, enemyAlg);
+            var gameSimulator = new GameSimulator(config);
+            return gameSimulator.RunSimulation() == Model.Enums.PlayerColor.White ? 1 : 0;
         }
     }
 }

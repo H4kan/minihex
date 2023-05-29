@@ -45,11 +45,15 @@ namespace minihex.engine.test.Hypothesis
             int numberOfWins = 0;
             var enemiesEngines = TestHelpers.GetAllEngines();
 
-            for (int i = 0; i < NumberOfTestsForEachSeedAndEngine; i++)
+            foreach (var seed in _seedIterator)
             {
-                foreach (var enemy in enemiesEngines)
+                RandomSource.SetSeed(seed);
+                for (int i = 0; i < NumberOfTestsForEachSeedAndEngine; i++)
                 {
-                    numberOfWins += RunSimulationsAndCountWins(engine, enemy, iterations, gameSize, PlayerColor.White);
+                    foreach (var enemy in enemiesEngines)
+                    {
+                        numberOfWins += RunSimulationsAndCountWins(engine, enemy, iterations, gameSize, PlayerColor.White);
+                    }
                 }
             }
 
@@ -58,16 +62,9 @@ namespace minihex.engine.test.Hypothesis
 
         private int RunSimulationsAndCountWins(Algorithm whiteAlg, Algorithm blackAlg, int iterations, int gameSize, PlayerColor expectedToWin)
         {
-            int wins = 0;
-            foreach (var seed in _seedIterator)
-            {
-                RandomSource.SetSeed(seed);
-                var config = TestHelpers.CreateEnginesConfiguration(gameSize, whiteAlg, blackAlg, iterations, false);
-                var gameSimulator = new GameSimulator(config);
-                wins += gameSimulator.RunSimulation() == expectedToWin ? 1 : 0;
-            }
-
-            return wins;
+            var config = TestHelpers.CreateEnginesConfiguration(gameSize, whiteAlg, blackAlg, iterations, false);
+            var gameSimulator = new GameSimulator(config);
+            return gameSimulator.RunSimulation() == expectedToWin ? 1 : 0;
         }
     }
 }

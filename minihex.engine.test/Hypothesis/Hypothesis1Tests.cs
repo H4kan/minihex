@@ -45,12 +45,17 @@ namespace minihex.engine.test.Hypothesis
         {
             int numberOfWins = 0;
             var enemiesEngines = TestHelpers.GetAllEngines();
-            for (int i = 0; i < NumberOfTestsForEachSeedAndEngine; i++)
+
+            foreach (var seed in _seedIterator)
             {
-                foreach (var enemy in enemiesEngines)
+                RandomSource.SetSeed(seed);
+                for (int i = 0; i < NumberOfTestsForEachSeedAndEngine; i++)
                 {
-                    numberOfWins += RunSimulationsAndCountWins(engine, enemy, iterations, gameSize, PlayerColor.White, swap);
-                    numberOfWins += RunSimulationsAndCountWins(enemy, engine, iterations, gameSize, PlayerColor.Black, swap);
+                    foreach (var enemy in enemiesEngines)
+                    {
+                        numberOfWins += RunSimulationsAndCountWins(engine, enemy, iterations, gameSize, PlayerColor.White, swap);
+                        numberOfWins += RunSimulationsAndCountWins(enemy, engine, iterations, gameSize, PlayerColor.Black, swap);
+                    }
                 }
             }
 
@@ -59,19 +64,11 @@ namespace minihex.engine.test.Hypothesis
 
         private int RunSimulationsAndCountWins(Algorithm whiteAlg, Algorithm blackAlg, int iterations, int gameSize, PlayerColor expectedToWin, bool swap)
         {
-            int wins = 0;
-            foreach (var seed in _seedIterator)
-            {
-                int? whiteIterations = PlayerColor.White == expectedToWin ? iterations : null;
-                int? blackIterations = PlayerColor.Black == expectedToWin ? iterations : null;
-
-                RandomSource.SetSeed(seed);
-                var config = TestHelpers.CreateEnginesConfiguration(gameSize, whiteAlg, blackAlg, whiteIterations, blackIterations, swap);
-                var gameSimulator = new GameSimulator(config);
-                wins += gameSimulator.RunSimulation() == expectedToWin ? 1 : 0;
-            }
-
-            return wins;
+            int? whiteIterations = PlayerColor.White == expectedToWin ? iterations : null;
+            int? blackIterations = PlayerColor.Black == expectedToWin ? iterations : null;
+            var config = TestHelpers.CreateEnginesConfiguration(gameSize, whiteAlg, blackAlg, whiteIterations, blackIterations, swap);
+            var gameSimulator = new GameSimulator(config);
+            return gameSimulator.RunSimulation() == expectedToWin ? 1 : 0;
         }
     }
 }

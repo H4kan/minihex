@@ -14,11 +14,11 @@ namespace minihex.engine.test.Hypothesis
     public class Hypothesis2Tests
     {
         private readonly SeedHelperIterator _seedIterator = new();
-        private const int NumberOfTestsForEachSeed = 1; // Game for each pair white-black = NumberOfTestsForEachSeed*5
+        private const int NumberOfTestsForEachSeed = 5; // Game for each algorithm for each game size = NumberOfTestsForEachSeed*5*4
         private readonly List<int> GameSizes = new() { 5, 7, 9, 11 };
 
         [DataTestMethod]
-        [DataRow(false, "hypo2/winratio-results-noswap.txt")]
+        //[DataRow(false, "hypo2/winratio-results-noswap.txt")]
         [DataRow(true, "hypo2/winratio-results-swap.txt")]
         public void RunTests(bool swap, string fileName)
         {
@@ -55,11 +55,11 @@ namespace minihex.engine.test.Hypothesis
         private void CalculateAlgorithmWins(Algorithm engineWhite, Algorithm engineBlack, int gameSize, bool swap,
             GameStats whiteEngineStats, GameStats blackEngineStats)
         {
-            for (int i = 0; i < NumberOfTestsForEachSeed; i++)
+            foreach (var seed in _seedIterator)
             {
-                foreach (var seed in _seedIterator)
+                RandomSource.SetSeed(seed);
+                for (int i = 0; i < NumberOfTestsForEachSeed; i++)
                 {
-                    RandomSource.SetSeed(seed);
                     var config = TestHelpers.CreateEnginesConfiguration(gameSize, engineWhite, engineBlack, swap);
                     var gameSimulator = new GameSimulator(config);
                     if (gameSimulator.RunSimulation() == PlayerColor.White)

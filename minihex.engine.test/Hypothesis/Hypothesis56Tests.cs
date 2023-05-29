@@ -43,10 +43,14 @@ namespace minihex.engine.test.Hypothesis
         private double CalculateWinRatioForAlgorithm(Algorithm engine, int iterations, int gameSize)
         {
             int numberOfWins = 0;
-            for (int i = 0; i < NumberOfTestsForEachSeed; i += 2)
+            foreach (var seed in _seedIterator)
             {
-                numberOfWins += RunSimulationsAndCountWins(engine, Algorithm.Heuristic, iterations, gameSize, PlayerColor.White);
-                numberOfWins += RunSimulationsAndCountWins(Algorithm.Heuristic, engine, iterations, gameSize, PlayerColor.Black);
+                RandomSource.SetSeed(seed);
+                for (int i = 0; i < NumberOfTestsForEachSeed; i += 2)
+                {
+                    numberOfWins += RunSimulationsAndCountWins(engine, Algorithm.Heuristic, iterations, gameSize, PlayerColor.White);
+                    numberOfWins += RunSimulationsAndCountWins(Algorithm.Heuristic, engine, iterations, gameSize, PlayerColor.Black);
+                }
             }
 
             return numberOfWins / (double)(NumberOfTestsForEachSeed * _seedIterator.Count * 2);
@@ -54,16 +58,9 @@ namespace minihex.engine.test.Hypothesis
 
         private int RunSimulationsAndCountWins(Algorithm whiteAlg, Algorithm blackAlg, int iterations, int gameSize, PlayerColor expectedToWin)
         {
-            int wins = 0;
-            foreach (var seed in _seedIterator)
-            {
-                RandomSource.SetSeed(seed);
-                var config = TestHelpers.CreateEnginesConfiguration(gameSize, whiteAlg, blackAlg, iterations, true);
-                var gameSimulator = new GameSimulator(config);
-                wins += gameSimulator.RunSimulation() == expectedToWin ? 1 : 0;
-            }
-
-            return wins;
+            var config = TestHelpers.CreateEnginesConfiguration(gameSize, whiteAlg, blackAlg, iterations, true);
+            var gameSimulator = new GameSimulator(config);
+            return gameSimulator.RunSimulation() == expectedToWin ? 1 : 0;
         }
     }
 }
