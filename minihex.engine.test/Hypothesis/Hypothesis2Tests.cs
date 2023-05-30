@@ -15,10 +15,10 @@ namespace minihex.engine.test.Hypothesis
     {
         private readonly SeedHelperIterator _seedIterator = new();
         private const int NumberOfTestsForEachSeed = 5; // Game for each algorithm for each game size = NumberOfTestsForEachSeed*5*4
-        private readonly List<int> GameSizes = new() { 5, 7, 9, 11 };
+        private readonly List<int> GameSizes = new() { 5, 7, 9 };
 
         [DataTestMethod]
-        //[DataRow(false, "hypo2/winratio-results-noswap.txt")]
+        [DataRow(false, "hypo2/winratio-results-noswap.txt")]
         [DataRow(true, "hypo2/winratio-results-swap.txt")]
         public void RunTests(bool swap, string fileName)
         {

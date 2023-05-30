@@ -54,7 +54,7 @@ namespace minihex.engine.test.Hypothesis
             return numberOfWins / (double)(NumberOfRuns * _seedIterator.Count);
         }
 
-        private int RunSimulationsAndCountWins(Algorithm enemyAlg)
+        private static int RunSimulationsAndCountWins(Algorithm enemyAlg)
         {
             var config = TestHelpers.CreateEnginesConfiguration(GameSize, enemyAlg);
             var gameSimulator = new GameSimulator(config);
