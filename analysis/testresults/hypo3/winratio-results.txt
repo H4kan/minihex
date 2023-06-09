@@ -1,0 +1,7 @@
+Algorithm WinRatio
+Heuristic 0
+MCTS 0.4
+MCTSwSavebridge 0.44
+MSTSwAMAF 0.04
+MCTSwAMAFandSavebridge 0.08
+Aggregated 0.192

@@ -5,8 +5,8 @@ namespace minihex.engine.Engine.Engines
 {
     public class MctsAmafEngine : MctsEngine
     {
-        public MctsAmafEngine(GameExt game, CancellationToken cancellationToken) : base(game, cancellationToken)
-        { }
+        public MctsAmafEngine(GameExt game, CancellationToken cancellationToken, int? maxIterations = null)
+            : base(game, cancellationToken, maxIterations) { }
 
         protected override StateNode CreateRoot()
         {

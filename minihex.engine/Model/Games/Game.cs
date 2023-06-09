@@ -10,7 +10,7 @@ namespace minihex.engine.Model.Games
 
         protected List<int> _moves;
 
-        public Game(int size, bool swap)
+        public Game(int size)
         {
             Board = new PlayerColor[size, size];
             _moves = new List<int>();
